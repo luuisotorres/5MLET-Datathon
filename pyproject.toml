@@ -1,0 +1,27 @@
+[project]
+name = "5mlet-datathon"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "renatoinomata", email = "renato.inomata@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "numpy>=2.4.1",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.0",
+    "scikit-learn>=1.8.0",
+]
+
+[project.scripts]
+5mlet-datathon = "5mlet_datathon:main"
+
+[build-system]
+requires = ["uv_build>=0.8.11,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.1.0",
+]
