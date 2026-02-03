@@ -6,7 +6,6 @@ import mlflow.sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_auc_score
 
-# Seus módulos
 from passos_magicos.models import ModelFactory
 from passos_magicos.utils import get_dummy_data 
 
@@ -16,7 +15,8 @@ def train(config_path):
         cfg = yaml.safe_load(f)
 
     # Setup MLflow
-    mlflow.set_tracking_uri("http://localhost:5000")
+    # mlflow.set_tracking_uri("http://localhost:5000")
+    # mlflow.set_tracking_uri("file:./mlruns")
     mlflow.set_experiment(cfg['experiment_name'])
 
     with mlflow.start_run(run_name=cfg.get('run_name')):
@@ -50,11 +50,11 @@ def train(config_path):
         auc = roc_auc_score(y_test, y_proba)
         print(f"📊 AUC Score: {auc:.4f}")
 
-        # 8. Logar tudo no MLflow
+        # Log metrics and params to MLflow
         mlflow.log_params(cfg['model']['params'])
         mlflow.log_metric("auc", auc)
         
-        # Loga o modelo final para ser usado depois
+        # Log model
         mlflow.sklearn.log_model(model, "model")
         
         print("✅ Training completed and artifacts saved in MLflow.")

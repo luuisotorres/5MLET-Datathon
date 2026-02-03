@@ -2,7 +2,7 @@ experiment_name: "teste_de_infraestrutura"
 run_name: "primeiro_teste_sem_dados"
 
 data:
-  target_column: "risco_defasagem" # Nome igual ao gerado no utils.py
+  target_column: "target"
   test_size: 0.3
 
 model:
