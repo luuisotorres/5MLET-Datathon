@@ -1,4 +1,4 @@
-.PHONY: silver gold data clean
+.PHONY: silver gold data clean test
 
 # ==============================================================================
 # Data Pipeline Commands
@@ -17,9 +17,18 @@ data: silver gold
 	@echo "==> Data pipeline completed successfully!"
 
 # ==============================================================================
-# Utility Commands (Cross-Platform)
+# Utility Commands
 # ==============================================================================
 
 clean:
 	@echo "==> Triggering cleanup script..."
 	uv run python src/passos_magicos/data/cleanup_environment.py
+
+# ==============================================================================
+# Quality Assurance Commands
+# ==============================================================================
+
+test:
+	@echo "==> Running Pytest suite..."
+	uv run pytest tests/ -v
+	@echo "==> All tests passed successfully!"
