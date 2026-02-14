@@ -1,4 +1,4 @@
-from passos_magicos.data.utils import FeatureNames
+from passos_magicos.data.constants import FeatureNames
 
 __all__ = [
     'FeatureNames',

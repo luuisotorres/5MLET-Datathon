@@ -1,11 +1,16 @@
 import pandas as pd
-import numpy as np
 import logging
-import re
 from pathlib import Path
 from typing import Dict, List, Callable
 
 from passos_magicos.data import FeatureNames as FN
+from passos_magicos.data.data_cleaning import (
+    clean_fase, clean_genero, 
+    clean_idade, clean_inde, 
+    clean_pedra, clean_ra,
+    clean_instituicao,
+)
+
 
 # Set up logging
 logging.basicConfig(
@@ -19,10 +24,23 @@ SILVER_DIR_PATH = Path("data/02_silver")
 
 # Columns to keep in the Silver layer (standardized across years)
 COLUMNS_TO_KEEP = [
-    FN.RA, FN.ANO_DADOS, FN.FASE, FN.IDADE, FN.GENERO,
-    FN.ANOS_NA_INSTITUICAO, FN.INSTITUICAO, FN.PEDRA_ATUAL,
-    FN.INDE, FN.IAA, FN.IEG, FN.IPS, FN.IDA, FN.IPV,
-    FN.IAN, FN.IPP, FN.DEFASAGEM
+    FN.RA, 
+    FN.ANO_DADOS, 
+    FN.FASE, 
+    FN.IDADE, 
+    FN.GENERO,
+    FN.ANOS_NA_INSTITUICAO, 
+    FN.INSTITUICAO, 
+    FN.PEDRA_ATUAL,
+    FN.INDE, 
+    FN.IAA, 
+    FN.IEG, 
+    FN.IPS, 
+    FN.IDA, 
+    FN.IPV,
+    FN.IAN, 
+    FN.IPP, 
+    FN.DEFASAGEM,
 ]
 
 COLUMN_MAPPINGS = {
@@ -82,89 +100,6 @@ COLUMN_MAPPINGS = {
 }
 
 
-#  Data cleaning functions
-def clean_fase(valor):
-    if pd.isna(valor):
-        return np.nan
-    str_val = str(valor).upper().strip()
-    if 'ALFA' in str_val:
-        return 0
-    match = re.search(r'(\d+)', str_val)
-    if match:
-        return int(match.group(1))
-    return np.nan
-
-
-def clean_idade(valor):
-    if pd.isna(valor):
-        return valor
-    str_val = str(valor)
-    if str_val.startswith('1900-01-'):
-        try:
-            return pd.to_datetime(str_val).day
-        except (ValueError, TypeError):
-            return np.nan
-    try:
-        return int(float(str_val))
-    except (ValueError, TypeError):
-        return valor
-
-
-def clean_genero(valor):
-    map_generos = {'Menina': 'F', 'Menino': 'M',
-                   'Feminino': 'F', 'Masculino': 'M'}
-    if pd.isna(valor):
-        return np.nan
-    return map_generos.get(valor)
-
-
-def clean_ra(valor):
-    if pd.isna(valor):
-        return np.nan
-    str_val = str(valor).upper().strip()
-    match = re.search(r'(\d+)', str_val)
-    if match:
-        return int(match.group(1))
-    return np.nan
-
-
-def clean_pedra(valor):
-    if pd.isna(valor) or valor == 'INCLUIR':
-        return None
-    if valor == 'Agata':
-        return 'Ágata'
-    return valor
-
-
-def clean_inde(valor):
-    if pd.isna(valor) or valor == 'INCLUIR':
-        return np.nan
-    try:
-        return float(valor)
-    except ValueError:
-        return np.nan
-
-
-def clean_instituicao(valor):
-    map_instituicao = {
-        'Escola Pública': 'Pública',
-        'Pública': 'Pública',
-        'Rede Decisão': 'Privada',
-        'Escola JP II': 'Privada',
-        'Privada': 'Privada',
-        'Privada - Programa de Apadrinhamento': 'Bolsista',
-        'Privada - Programa de apadrinhamento': 'Bolsista',
-        'Privada *Parcerias com Bolsa 100%': 'Bolsista',
-        'Privada - Pagamento por *Empresa Parceira': 'Bolsista',
-        'Bolsista Universitário *Formado (a)': 'Bolsista',
-        'Concluiu o 3º EM': 'Outros',
-        'Nenhuma das opções acima': 'Outros',
-    }
-    if pd.isna(valor):
-        return 'Outros'
-    return map_instituicao.get(valor, 'Outros')
-
-
 def _apply_global_cleaning(df: pd.DataFrame) -> pd.DataFrame:
     """Applies all the hygienic transformations to the standardized dataframe."""
     logging.info("Applying global hygiene and feature engineering...")
@@ -212,20 +147,30 @@ def _transform_2022(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _transform_2023(df: pd.DataFrame) -> pd.DataFrame:
+    """No specific transformations needed for 2023, but we keep the function for consistency and future-proofing."""
     return df
 
 
 def _transform_2024(df: pd.DataFrame) -> pd.DataFrame:
+    """No specific transformations needed for 2024, but we keep the function for consistency and future-proofing."""
     return df
 
 
 STRATEGIES: Dict[int, Callable[[pd.DataFrame], pd.DataFrame]] = {
-    2022: _transform_2022, 2023: _transform_2023, 2024: _transform_2024
+    2022: _transform_2022, 
+    2023: _transform_2023, 
+    2024: _transform_2024,
 }
 
 
 # Core preprocessing pipeline
-def process_sheet(xls: pd.ExcelFile, sheet_name: str, year: int, mapping: Dict[str, str], keep_columns: List[str]) -> pd.DataFrame:
+def process_sheet(
+        xls: pd.ExcelFile, 
+        sheet_name: str, 
+        year: int, 
+        mapping: Dict[str, str], 
+        keep_columns: List[str]
+    ) -> pd.DataFrame:
     logging.info(f"Processing sheet: {sheet_name} (Year: {year})")
     df = pd.read_excel(xls, sheet_name=sheet_name)
 
@@ -248,7 +193,8 @@ def process_sheet(xls: pd.ExcelFile, sheet_name: str, year: int, mapping: Dict[s
     for col in keep_columns:
         if col not in df_clean.columns:
             logging.warning(
-                f"Column '{col}' is missing in year {year}. Creating as pd.NA.")
+                f"Column '{col}' is missing in year {year}. Creating as pd.NA."
+            )
             df_clean[col] = pd.NA
 
     df_clean = df_clean[keep_columns]
@@ -265,12 +211,21 @@ def main():
         logging.error(f"Bronze file not found at {BRONZE_FILE_PATH}.")
         return
 
-    sheets_to_process = {"PEDE2022": 2022, "PEDE2023": 2023, "PEDE2024": 2024}
+    sheets_to_process = {
+        "PEDE2022": 2022, 
+        "PEDE2023": 2023, 
+        "PEDE2024": 2024,
+    }
 
     for sheet_name, year in sheets_to_process.items():
         mapping = COLUMN_MAPPINGS.get(year, {})
         df_silver = process_sheet(
-            xls, sheet_name, year, mapping, COLUMNS_TO_KEEP)
+            xls, 
+            sheet_name, 
+            year, 
+            mapping, 
+            COLUMNS_TO_KEEP,
+        )
 
         output_path = SILVER_DIR_PATH / f"alunos_{year}_clean.parquet"
         df_silver.to_parquet(output_path, index=False)
