@@ -1,12 +1,12 @@
 import pandas as pd
 import logging
-from pathlib import Path
 from typing import Dict, List, Callable
 
 from passos_magicos.data import FeatureNames as FN
-from passos_magicos.data.data_cleaning import (
-    clean_fase, clean_genero, 
-    clean_idade, clean_inde, 
+from passos_magicos.data import ProjectPaths as PP
+from passos_magicos.data.preprocessing import (
+    clean_fase, clean_genero,
+    clean_idade, clean_inde,
     clean_pedra, clean_ra,
     clean_instituicao,
 )
@@ -18,28 +18,25 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# File Paths
-BRONZE_FILE_PATH = Path("data/01_bronze/PEDE_2022-24.xlsx")
-SILVER_DIR_PATH = Path("data/02_silver")
 
 # Columns to keep in the Silver layer (standardized across years)
 COLUMNS_TO_KEEP = [
-    FN.RA, 
-    FN.ANO_DADOS, 
-    FN.FASE, 
-    FN.IDADE, 
+    FN.RA,
+    FN.ANO_DADOS,
+    FN.FASE,
+    FN.IDADE,
     FN.GENERO,
-    FN.ANOS_NA_INSTITUICAO, 
-    FN.INSTITUICAO, 
+    FN.ANOS_NA_INSTITUICAO,
+    FN.INSTITUICAO,
     FN.PEDRA_ATUAL,
-    FN.INDE, 
-    FN.IAA, 
-    FN.IEG, 
-    FN.IPS, 
-    FN.IDA, 
+    FN.INDE,
+    FN.IAA,
+    FN.IEG,
+    FN.IPS,
+    FN.IDA,
     FN.IPV,
-    FN.IAN, 
-    FN.IPP, 
+    FN.IAN,
+    FN.IPP,
     FN.DEFASAGEM,
 ]
 
@@ -157,20 +154,20 @@ def _transform_2024(df: pd.DataFrame) -> pd.DataFrame:
 
 
 STRATEGIES: Dict[int, Callable[[pd.DataFrame], pd.DataFrame]] = {
-    2022: _transform_2022, 
-    2023: _transform_2023, 
+    2022: _transform_2022,
+    2023: _transform_2023,
     2024: _transform_2024,
 }
 
 
 # Core preprocessing pipeline
 def process_sheet(
-        xls: pd.ExcelFile, 
-        sheet_name: str, 
-        year: int, 
-        mapping: Dict[str, str], 
-        keep_columns: List[str]
-    ) -> pd.DataFrame:
+    xls: pd.ExcelFile,
+    sheet_name: str,
+    year: int,
+    mapping: Dict[str, str],
+    keep_columns: List[str]
+) -> pd.DataFrame:
     logging.info(f"Processing sheet: {sheet_name} (Year: {year})")
     df = pd.read_excel(xls, sheet_name=sheet_name)
 
@@ -203,31 +200,31 @@ def process_sheet(
 
 def main():
     logging.info("Starting Bronze to Silver extraction...")
-    SILVER_DIR_PATH.mkdir(parents=True, exist_ok=True)
+    PP.SILVER_DIR.mkdir(parents=True, exist_ok=True)
 
     try:
-        xls = pd.ExcelFile(BRONZE_FILE_PATH)
+        xls = pd.ExcelFile(PP.BRONZE_FILE)
     except FileNotFoundError:
-        logging.error(f"Bronze file not found at {BRONZE_FILE_PATH}.")
+        logging.error(f"Bronze file not found at {PP.BRONZE_FILE}.")
         return
 
     sheets_to_process = {
-        "PEDE2022": 2022, 
-        "PEDE2023": 2023, 
+        "PEDE2022": 2022,
+        "PEDE2023": 2023,
         "PEDE2024": 2024,
     }
 
     for sheet_name, year in sheets_to_process.items():
         mapping = COLUMN_MAPPINGS.get(year, {})
         df_silver = process_sheet(
-            xls, 
-            sheet_name, 
-            year, 
-            mapping, 
+            xls,
+            sheet_name,
+            year,
+            mapping,
             COLUMNS_TO_KEEP,
         )
 
-        output_path = SILVER_DIR_PATH / f"alunos_{year}_clean.parquet"
+        output_path = PP.SILVER_DIR / f"alunos_{year}_clean.parquet"
         df_silver.to_parquet(output_path, index=False)
         logging.info(f"Successfully saved {output_path}")
 

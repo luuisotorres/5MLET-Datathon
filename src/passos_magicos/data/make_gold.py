@@ -3,18 +3,14 @@ import sqlite3
 import logging
 from pathlib import Path
 
-from passos_magicos.data.constants import FeatureNames as FN
+from passos_magicos.data import FeatureNames as FN
+from passos_magicos.data import ProjectPaths as PP
 
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-
-# File Paths
-SILVER_DIR_PATH = Path("data/02_silver")
-GOLD_DIR_PATH = Path("data/03_gold")
-ONLINE_STORE_DB_PATH = Path("feature_store_online.db")
 
 
 def load_silver_data(silver_dir: Path) -> pd.DataFrame:
@@ -107,16 +103,16 @@ def main():
 
     try:
         # Extract
-        df_silver = load_silver_data(SILVER_DIR_PATH)
+        df_silver = load_silver_data(PP.SILVER_DIR)
 
         # Transform (Time-series shifting)
         df_gold = engineer_features_and_target(df_silver)
 
         # Load (Offline Batch)
-        save_offline_store(df_gold, GOLD_DIR_PATH)
+        save_offline_store(df_gold, PP.GOLD_DIR)
 
         # Load (Online Real-time)
-        save_online_store(df_gold, ONLINE_STORE_DB_PATH)
+        save_online_store(df_gold, PP.ONLINE_STORE_DB)
 
         logging.info(
             "Gold Layer Pipeline completed successfully! Ready for Model Training."
