@@ -66,7 +66,7 @@ def save_offline_store(df: pd.DataFrame, gold_dir: Path):
     logging.info(f"Offline Feature Store saved at {feature_store_path}")
 
     # Training Data (Only rows where the Target is NOT null)
-    # The last year for every student will have a NaN target (we don't know the future yet)
+    # The last year for every student will have a NaN target (since we don't know the future yet)
     df_train = df.dropna(subset=[FN.TARGET_DEFASAGEM]).copy()
     train_path = gold_dir / "train_data.parquet"
     df_train.to_parquet(train_path, index=False)
@@ -79,11 +79,10 @@ def save_online_store(df: pd.DataFrame, db_path: Path):
     """Saves only the most recent snapshot of each student to a SQLite Database."""
     logging.info("Building Online Store (SQLite) for fast API inference...")
 
-    # Since the dataframe is already sorted by Year, keeping the 'last' occurrence
-    # guarantees we get the most up-to-date features for each student.
+    # Keeping last is crucial because the last row for each RA will have the most recent year and features.
     df_latest = df.drop_duplicates(subset=[FN.RA], keep='last').copy()
 
-    # We drop the target column for the online store since inference shouldn't have access to the future
+    # Dropping the target column for the online store since inference shouldn't have access to the future
     if FN.TARGET_DEFASAGEM in df_latest.columns:
         df_latest = df_latest.drop(columns=[FN.TARGET_DEFASAGEM])
 
@@ -107,20 +106,21 @@ def main():
     logging.info("Starting Silver to Gold transformation...")
 
     try:
-        # Step 1: Extract
+        # Extract
         df_silver = load_silver_data(SILVER_DIR_PATH)
 
-        # Step 2: Transform (Time-series shifting)
+        # Transform (Time-series shifting)
         df_gold = engineer_features_and_target(df_silver)
 
-        # Step 3: Load (Offline Batch)
+        # Load (Offline Batch)
         save_offline_store(df_gold, GOLD_DIR_PATH)
 
-        # Step 4: Load (Online Real-time)
+        # Load (Online Real-time)
         save_online_store(df_gold, ONLINE_STORE_DB_PATH)
 
         logging.info(
-            "Gold Layer Pipeline completed successfully! Ready for Model Training.")
+            "Gold Layer Pipeline completed successfully! Ready for Model Training."
+        )
 
     except Exception as e:
         logging.error(f"Pipeline failed: {e}")
