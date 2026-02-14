@@ -18,3 +18,4 @@ class FeatureNames:
     IAN = 'indicador_adequacao_nivel'
     IPP = 'indicador_psico_pedagogico'
     DEFASAGEM = 'defasagem'
+    TARGET_DEFASAGEM = 'target_defasagem'
