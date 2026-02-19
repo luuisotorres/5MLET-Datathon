@@ -1,0 +1,49 @@
+experiment_name: "passos_magicos_defasagem_v1"
+run_name: "random_forest_v1"
+registered_model_name: "passos_magicos_defasagem_v1"
+random_state: 42
+
+data:
+  input_path: "data/03_gold/train_data.parquet"
+  target_col: "target_defasagem"
+  filter_year_train: 2022
+  filter_year_test: 2023
+
+features:
+  numerical:
+    - "idade"
+    - "anos_na_instituicao"
+    - "fase"
+    - "inde_atual"
+    # Note: Pipeline A (Best Model) uses 'inde_atual' and DROPS the individual 'indicador_*' features.
+    # If you want to test Pipeline B, uncomment the lines below and remove 'inde_atual'.
+    # - "indicador_auto_avaliacao"
+    # - "indicador_engajamento"
+    # - "indicador_psicossocial"
+    # - "indicador_aprendizagem"
+    # - "indicador_ponto_virada"
+    # - "indicador_adequacao_nivel"
+    # - "indicador_psico_pedagogico"
+  categorical:
+    - "instituicao"
+  binary:
+    - "genero"
+
+preprocessing:
+  imputer_strategy: null  # Notebook drops NaNs instead of imputing
+  scaler: null            # The original run hasn't used scaling methods
+  encoder: "onehot"
+  # Clip range for indicators (if used)
+  clip_min: 0
+  clip_max: 10
+
+model:
+  # Available types: "random_forest", "xgboost", "lightgbm"
+  type: "random_forest"       
+  params:
+    n_estimators: 200
+    max_depth: 8
+    min_samples_leaf: 2
+    class_weight: "balanced"
+    n_jobs: -1
+    random_state: 42
