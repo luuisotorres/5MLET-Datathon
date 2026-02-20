@@ -1,0 +1,41 @@
+experiment_name: "passos_magicos_defasagem_v1"
+run_name: "lightgbm_v1"
+registered_model_name: "passos_magicos_defasagem_v1"
+random_state: 42
+
+data:
+  input_path: "data/03_gold/train_data.parquet"
+  target_col: "target_defasagem"
+  filter_year_train: 2022
+  filter_year_test: 2023
+
+features:
+  numerical:
+    - "idade"
+    - "anos_na_instituicao"
+    - "fase"
+    - "inde_atual"
+  categorical:
+    - "instituicao"
+  binary:
+    - "genero"
+
+preprocessing:
+  imputer_strategy: null
+  scaler: null
+  encoder: "onehot"
+  clip_min: 0
+  clip_max: 10
+
+model:
+  type: "lightgbm"
+  params:
+    n_estimators: 200
+    max_depth: 6
+    num_leaves: 31
+    min_child_samples: 10
+    class_weight: "balanced"
+    objective: "multiclass"
+    verbosity: -1
+    n_jobs: -1
+    random_state: 42

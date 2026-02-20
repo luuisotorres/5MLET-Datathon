@@ -1,0 +1,40 @@
+experiment_name: "passos_magicos_defasagem_v1"
+run_name: "xgboost_v1"
+registered_model_name: "passos_magicos_defasagem_v1"
+random_state: 42
+
+data:
+  input_path: "data/03_gold/train_data.parquet"
+  target_col: "target_defasagem"
+  filter_year_train: 2022
+  filter_year_test: 2023
+
+features:
+  numerical:
+    - "idade"
+    - "anos_na_instituicao"
+    - "fase"
+    - "inde_atual"
+  categorical:
+    - "instituicao"
+  binary:
+    - "genero"
+
+preprocessing:
+  imputer_strategy: null
+  scaler: null
+  encoder: "onehot"
+  clip_min: 0
+  clip_max: 10
+
+model:
+  type: "xgboost"
+  params:
+    n_estimators: 200
+    max_depth: 6
+    min_samples_leaf: 2
+    learning_rate: 0.05
+    objective: "multi:softprob"
+    eval_metric: "mlogloss"
+    n_jobs: -1
+    random_state: 42
