@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List, Callable
 
 from passos_magicos.data import FeatureNames as FN
-from passos_magicos.data import ProjectPaths as PP
+from passos_magicos.core.paths import ProjectPaths as PP
 from passos_magicos.data.preprocessing import (
     clean_fase, clean_genero,
     clean_idade, clean_inde,

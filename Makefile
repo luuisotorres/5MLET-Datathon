@@ -32,3 +32,18 @@ test:
 	@echo "==> Running Pytest suite..."
 	uv run pytest tests/ -v
 	@echo "==> All tests passed successfully!"
+
+# ==============================================================================
+# Model Training & MLOps Commands
+# ==============================================================================
+
+train:
+	@echo "==> Training model with current config..."
+	uv run python -m src.passos_magicos.models.train
+
+ui:
+	@echo "==> Starting MLflow UI..."
+	uv run mlflow ui
+
+# The 'all' target runs the full pipeline from raw data to trained model
+all: data train

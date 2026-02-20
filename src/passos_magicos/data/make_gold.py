@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from passos_magicos.data import FeatureNames as FN
-from passos_magicos.data import ProjectPaths as PP
+from passos_magicos.core.paths import ProjectPaths as PP
 
 # Set up logging
 logging.basicConfig(
