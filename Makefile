@@ -37,9 +37,11 @@ test:
 # Model Training & MLOps Commands
 # ==============================================================================
 
+CONFIG ?= config/config.yaml
+
 train:
-	@echo "==> Training model with current config..."
-	uv run python -m src.passos_magicos.models.train
+	@echo "==> Training model with config: $(CONFIG)..."
+	uv run python -m src.passos_magicos.models.train --config $(CONFIG)
 
 ui:
 	@echo "==> Starting MLflow UI..."
