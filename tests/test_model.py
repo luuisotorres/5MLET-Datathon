@@ -3,12 +3,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 from passos_magicos.config_loader import load_config
 from passos_magicos.ml_preprocessing import get_preprocessor
-from passos_magicos.dispatcher import MODEL_DISPATCHER
-
-def test_model_dispatcher():
-    assert "random_forest" in MODEL_DISPATCHER
-    assert "xgboost" in MODEL_DISPATCHER
-    assert "lightgbm" in MODEL_DISPATCHER
+from passos_magicos.models.factory import ModelFactory
 
 def test_pipeline_assembly():
     # Mock config
@@ -31,11 +26,14 @@ def test_pipeline_assembly():
     }
     
     preprocessor = get_preprocessor(config)
+
+    model_name = config['model']['type']
+    model_params = config['model']['params']
     
-    model_class = MODEL_DISPATCHER[config['model']['type']]
+    classifier = ModelFactory.get_model(model_name, model_params)
     pipeline = Pipeline([
         ('preprocessor', preprocessor),
-        ('model', model_class(**config['model']['params']))
+        ('model', classifier)
     ])
     
     assert len(pipeline.steps) == 2

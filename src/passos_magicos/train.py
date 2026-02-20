@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 import mlflow
 import mlflow.sklearn
@@ -5,13 +6,22 @@ from sklearn.pipeline import Pipeline
 from pprint import pprint
 
 from passos_magicos.config_loader import load_config
-from passos_magicos.dispatcher import MODEL_DISPATCHER
+from passos_magicos.models.factory import ModelFactory
 from passos_magicos.ml_preprocessing import create_target_class, get_preprocessor
-from passos_magicos.evaluate import evaluate_model
+from passos_magicos.models.evaluate import evaluate_model
 
 def main():
+    parser = argparse.ArgumentParser(description="Train Passos Mágicos model")
+    parser.add_argument(
+        "--config", "-c",
+        type=str,
+        default="config/config.yaml",
+        help="Path to the configuration YAML file"
+    )
+    args = parser.parse_args()
+
     # 1. Load Configuration
-    config = load_config("config.yaml")
+    config = load_config(args.config)
     print("Configuration loaded:")
     pprint(config)
 
@@ -54,12 +64,13 @@ def main():
         preprocessor = get_preprocessor(config)
         
         model_name = config['model']['type']
-        model_class = MODEL_DISPATCHER[model_name]
         model_params = config['model']['params']
+
+        classifier = ModelFactory.get_model(model_name, model_params)
         
         pipeline = Pipeline(steps=[
             ('preprocessor', preprocessor),
-            ('classifier', model_class(**model_params))
+            ('classifier', classifier)
         ])
         
         # 7. Train

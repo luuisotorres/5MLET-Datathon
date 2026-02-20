@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from passos_magicos.evaluate import evaluate_model
+from passos_magicos.models.evaluate import evaluate_model
 
 def test_evaluate_model():
     """Test that evaluate_model returns the correct structure (dict, str)."""
