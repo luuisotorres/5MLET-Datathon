@@ -5,9 +5,9 @@ import mlflow.sklearn
 from sklearn.pipeline import Pipeline
 from pprint import pprint
 
-from passos_magicos.config_loader import load_config
+from passos_magicos.models.config_loader import load_config
 from passos_magicos.models.factory import ModelFactory
-from passos_magicos.ml_preprocessing import create_target_class, get_preprocessor
+from passos_magicos.models.ml_preprocessing import create_target_class, get_preprocessor
 from passos_magicos.models.evaluate import evaluate_model
 
 def main():
@@ -98,7 +98,7 @@ def main():
         )
         
         # Log config file as artifact
-        mlflow.log_artifact("config.yaml")
+        mlflow.log_artifact(args.config)
         
         print(f"Run ID: {run.info.run_id}")
 
