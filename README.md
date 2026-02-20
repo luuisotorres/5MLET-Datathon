@@ -18,12 +18,12 @@ uv sync
 To train a model using the configuration in `config/config.yaml` (default):
 ```bash
 # Make sure you are in the project root
-uv run python -m passos_magicos.train
+uv run python -m passos_magicos.models.train
 ```
 
 You can also run training with a specific configuration file:
 ```bash
-uv run python -m passos_magicos.train --config config/meu_experimento_random_forest.yaml
+uv run python -m passos_magicos.models.train --config config/my_experiment_random_forest.yaml
 ```
 
 **What happens when you run this?**

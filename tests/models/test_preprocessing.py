@@ -14,7 +14,7 @@ from passos_magicos.data.preprocessing import (
 )
 
 # Imports for ML transformations
-from passos_magicos.ml_preprocessing import create_target_class, clip_indicators
+from passos_magicos.models.ml_preprocessing import create_target_class, clip_indicators
 
 # --- Data Cleaning Tests ---
 
@@ -105,7 +105,7 @@ def test_map_gender():
     """Tests manual mapping of gender."""
     df = pd.DataFrame({'genero': ['M', 'F', 'M', 'F']})
     # Import locally to avoid circular dependency if any, or just rely on top import if updated
-    from passos_magicos.ml_preprocessing import map_gender
+    from passos_magicos.models.ml_preprocessing import map_gender
     
     df_mapped = map_gender(df)
     assert df_mapped['genero'].tolist() == [1, 0, 1, 0]

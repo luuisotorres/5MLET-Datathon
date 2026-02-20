@@ -39,7 +39,7 @@ test:
 
 train:
 	@echo "==> Training model with current config..."
-	uv run python -m src.passos_magicos.train
+	uv run python -m src.passos_magicos.models.train
 
 ui:
 	@echo "==> Starting MLflow UI..."

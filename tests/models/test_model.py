@@ -1,8 +1,8 @@
 import pytest
 import pandas as pd
 from sklearn.pipeline import Pipeline
-from passos_magicos.config_loader import load_config
-from passos_magicos.ml_preprocessing import get_preprocessor
+from passos_magicos.models.config_loader import load_config
+from passos_magicos.models.ml_preprocessing import get_preprocessor
 from passos_magicos.models.factory import ModelFactory
 
 def test_pipeline_assembly():
