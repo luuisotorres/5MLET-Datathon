@@ -27,10 +27,11 @@ This API was developed to identify the risk of academic lagging for students at 
 Using Machine Learning models (Random Forest), the system analyzes psychosocial and learning indicators to predict academic status.
 
 ## Features
-* **ML Management (Train):** Triggers asynchronous model training via an automated pipeline.
-* **ML Model (Predict):** Performs risk prediction based on the student's Registration ID (RA).
-* **ML Management (Model):** Discovery endpoint that returns hyperparameters and metadata of the production version (MLflow).
-* **General:** Status and health information of the service.
+* **General (Health Check):** System status and connectivity verification.
+* **ML Management (Train):** Triggers asynchronous model training. This stage only registers the model in MLflow for evaluation.
+* **ML Management (Promote):** Manual action to promote a specific Run ID to *Production* stage (Hot-swap enabled).
+* **ML Management (Model):** Discovery endpoint that returns hyperparameters, version, and metadata of the active model.
+* **ML Model (Predict):** Performs risk prediction fetching real-time data from the **SQLite Feature Store** based on Student RA.
 
 ## MLOps & Governance
 The model lifecycle is managed by **MLflow**, ensuring experiment traceability and automated promotion to the *Production* stage.
@@ -101,43 +102,15 @@ async def lifespan(app: FastAPI):
 # --- Application Instance ---
 app = FastAPI(
     title="Passos Mágicos API", 
-    description=description, # <--- Agora a descrição está sendo passada!
+    description=description,
     version=settings.api_version, 
     lifespan=lifespan,
     openapi_tags=[
+        {"name": "General", "description": "Utility endpoints and system status."},
         {"name": "ML Management", "description": "Model lifecycle operations: Training and Discovery."},
-        {"name": "ML Model", "description": "Core inference endpoints for lagging risk prediction."},
-        {"name": "General", "description": "Utility endpoints and system status."}
+        {"name": "ML Model", "description": "Core inference endpoints for lagging risk prediction."}
     ]
 )
 
-# --- Route Registration ---
-
-@app.get("/", tags=["General"])
-async def root():
-    """
-    Root endpoint for health checks.
-    Allows reviewers to verify if the web server is up and running.
-    """
-    model_status = (
-        "Loaded and Operational"
-        if app.state.model is not None
-        else "Awaiting Training/Promotion"
-    )
-    
-    data_status = (
-        f"Loaded ({len(app.state.data)} records)"
-        if app.state.data is not None
-        else "Not Loaded"
-    )
-
-    return {
-        "api_name": "Passos Mágicos - Student Lagging Risk",
-        "version": settings.api_version,
-        "status": "Online",
-        "model_status": model_status,
-        "data_status": data_status,
-        "message": "Welcome to the Passos Mágicos Project API.",
-    }
-
 app.include_router(api_router)
+
