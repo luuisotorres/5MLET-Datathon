@@ -1,8 +1,15 @@
-.PHONY: silver gold data clean test
+.PHONY: setup bronze silver gold data clean test
 
 # ==============================================================================
 # Data Pipeline Commands
 # ==============================================================================
+setup:
+	@echo "==> Initializing project folders..."
+	uv run src/passos_magicos/data/setup.py   
+
+bronze:
+	@echo: "==> Running Landing to Bronze pipeline..."
+	uv run python src/passos_magicos/data/make_bronze.py
 
 silver:
 	@echo "==> Running Bronze to Silver pipeline..."
@@ -12,8 +19,8 @@ gold:
 	@echo "==> Running Silver to Gold pipeline..."
 	uv run python src/passos_magicos/data/make_gold.py
 
-# The 'data' target runs 'silver' first, then 'gold'
-data: silver gold
+# The 'data' target runs from setup to gold
+data: setup bronze silver gold
 	@echo "==> Data pipeline completed successfully!"
 
 # ==============================================================================

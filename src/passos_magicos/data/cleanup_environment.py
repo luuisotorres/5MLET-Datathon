@@ -44,8 +44,11 @@ def clean_database(db_path: Path):
 def main():
     logging.info("Starting data cleanup process...")
 
+    clean_parquet_files(PP.LANDING_DIR)
+    clean_parquet_files(PP.BRONZE_DIR)
     clean_parquet_files(PP.SILVER_DIR)
     clean_parquet_files(PP.GOLD_DIR)
+    clean_parquet_files(PP.ARCHIVE_DIR)
     clean_database(PP.ONLINE_STORE_DB)
 
     logging.info(
