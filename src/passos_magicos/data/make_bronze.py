@@ -7,7 +7,7 @@ from datetime import datetime
 from passos_magicos.core.paths import ProjectPaths as PP
 
 
-def make_bronze():
+def main():
     print("🚀 Starting Bronze layer creation...")
     files_in_landing = glob.glob(os.path.join(PP.LANDING_DIR, "*"))
     if not files_in_landing:
@@ -45,4 +45,4 @@ def make_bronze():
             print(f"      ❌ Error processing file {file_name}: {e}")
 
 if __name__ == "__main__":
-    make_bronze()
+    main()

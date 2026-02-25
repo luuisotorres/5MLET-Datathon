@@ -2,7 +2,7 @@ import os
 from passos_magicos.core.paths import ProjectPaths as PP
 
 
-def make_directories():
+def main():
     """Creates all necessary directories for the project."""
 
     directories = [
@@ -20,5 +20,5 @@ def make_directories():
 
 
 if __name__ == "__main__":
-    make_directories()
+    main()
     print("✅ All necessary directories have been created.")

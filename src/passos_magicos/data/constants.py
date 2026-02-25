@@ -1,6 +1,3 @@
-from pathlib import Path
-
-
 class FeatureNames:
     """Centraliza os nomes das colunas da camada Silver/Gold para evitar Magic Strings."""
     RA = 'RA'
