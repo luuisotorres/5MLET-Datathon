@@ -8,8 +8,7 @@ from passos_magicos.core.paths import ProjectPaths as PP
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
@@ -17,7 +16,7 @@ def load_silver_data(silver_dir: Path) -> pd.DataFrame:
     """Loads and concatenates all Silver layer Parquet files."""
     logging.info(f"Loading Parquet files from {silver_dir}...")
 
-    parquet_files = list(silver_dir.glob("alunos_*_clean.parquet"))
+    parquet_files = list(silver_dir.glob("silver_*.parquet"))
 
     if not parquet_files:
         raise FileNotFoundError("No Parquet files found in the Silver layer.")
@@ -30,9 +29,7 @@ def load_silver_data(silver_dir: Path) -> pd.DataFrame:
 
     # Combine all years into a single DataFrame
     df_combined = pd.concat(dataframes, ignore_index=True)
-    logging.info(
-        f"Successfully concatenated all data. Total rows: {len(df_combined)}"
-    )
+    logging.info(f"Successfully concatenated all data. Total rows: {len(df_combined)}")
 
     return df_combined
 
@@ -76,7 +73,7 @@ def save_online_store(df: pd.DataFrame, db_path: Path):
     logging.info("Building Online Store (SQLite) for fast API inference...")
 
     # Keeping last is crucial because the last row for each RA will have the most recent year and features.
-    df_latest = df.drop_duplicates(subset=[FN.RA], keep='last').copy()
+    df_latest = df.drop_duplicates(subset=[FN.RA], keep="last").copy()
 
     # Dropping the target column for the online store since inference shouldn't have access to the future
     if FN.TARGET_DEFASAGEM in df_latest.columns:
@@ -87,8 +84,7 @@ def save_online_store(df: pd.DataFrame, db_path: Path):
         conn = sqlite3.connect(db_path)
 
         # Save dataframe as a SQL table, replacing the old one if it exists
-        df_latest.to_sql("aluno_features", conn,
-                         if_exists="replace", index=False)
+        df_latest.to_sql("aluno_features", conn, if_exists="replace", index=False)
         conn.close()
 
         logging.info(
@@ -107,6 +103,7 @@ def main():
 
         # Transform (Time-series shifting)
         df_gold = engineer_features_and_target(df_silver)
+        df_gold.drop(columns=[FN.METADATA_SHEET, FN.METADATA_SOURCE], inplace=True)
 
         # Load (Offline Batch)
         save_offline_store(df_gold, PP.GOLD_DIR)

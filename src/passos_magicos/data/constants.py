@@ -22,3 +22,5 @@ class FeatureNames:
     IPP = 'indicador_psico_pedagogico'
     DEFASAGEM = 'defasagem'
     TARGET_DEFASAGEM = 'target_defasagem'
+    METADATA_SOURCE = 'metadata_source'
+    METADATA_SHEET = 'metadata_sheet'
