@@ -8,16 +8,16 @@ setup:
 	uv run src/passos_magicos/data/setup.py   
 
 bronze:
-	@echo: "==> Running Landing to Bronze pipeline..."
-	uv run python src/passos_magicos/data/make_bronze.py
+	@echo "==> Running Landing to Bronze pipeline..."
+	uv run src/passos_magicos/data/make_bronze.py
 
 silver:
 	@echo "==> Running Bronze to Silver pipeline..."
-	uv run python src/passos_magicos/data/make_silver.py
+	uv run src/passos_magicos/data/make_silver.py
 
 gold:
 	@echo "==> Running Silver to Gold pipeline..."
-	uv run python src/passos_magicos/data/make_gold.py
+	uv run src/passos_magicos/data/make_gold.py
 
 # The 'data' target runs from setup to gold
 data: setup bronze silver gold
