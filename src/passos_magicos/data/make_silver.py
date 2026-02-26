@@ -143,7 +143,7 @@ def _calculate_missing_ipp(df: pd.DataFrame) -> pd.DataFrame:
     """Calculates IPP for years where it is missing (like 2022) using the standard formula."""
     if df[FN.IPP].isna().all():
         logging.info(
-            f"   -> 🔧 Column {FN.IPP} is missing/empty. Reconstructing via base formula..."
+            f"Column {FN.IPP} is missing/empty. Reconstructing via base formula..."
         )
 
         cols_to_numeric = [FN.INDE, FN.IAN, FN.IDA, FN.IEG, FN.IAA, FN.IPS, FN.IPV]
@@ -251,7 +251,7 @@ def _monitor_data_drift(
     df_current: pd.DataFrame, batch_name: str, df_reference: pd.DataFrame
 ):
     """Triggers Evidently AI comparing the new batch against the historical baseline."""
-    logging.info(f"📊 Checking Data Drift for batch: {batch_name}...")
+    logging.info(f"Checking Data Drift for batch: {batch_name}...")
 
     features_to_monitor = [
         FN.IDADE,
@@ -295,13 +295,13 @@ def _monitor_data_drift(
         failed_tests = [test for test in tests if test["status"] == "FAIL"]
         if len(failed_tests) > 0:
             logging.warning(
-                f"🚨 ALERT: Data Drift detected! Check the report at: {report_path}"
+                f"Data Drift detected! Check the report at: {report_path}"
             )
         else:
-            logging.info("✅ Data distribution is stable. No drift detected.")
+            logging.info("Data distribution is stable. No drift detected.")
 
     except KeyError:
-        logging.info(f"✅ Report generated successfully at {report_path}")
+        logging.info(f"Report generated successfully at {report_path}")
 
 
 # ==========================================
@@ -323,10 +323,10 @@ def main():
 
     if is_cold_start:
         logging.info(
-            "🧊 COLD START DETECTED: Silver layer is empty. Building baseline."
+            "COLD START DETECTED: Silver layer is empty. Building baseline."
         )
     else:
-        logging.info("🔥 INCREMENTAL LOAD DETECTED: Existing Silver data found.")
+        logging.info("INCREMENTAL LOAD DETECTED: Existing Silver data found.")
 
     for file_path in bronze_files:
         file_name = os.path.basename(file_path)
@@ -341,12 +341,12 @@ def main():
 
         if os.path.exists(expected_silver_path):
             logging.info(
-                f"⏭️ SKIPPING: {file_name} (Silver target '{batch_year}' already exists)."
+                f"SKIPPING: {file_name} (Silver target '{batch_year}' already exists)."
             )
             continue  # Skips the rest of the loop and goes to the next file!
         # ----------------------------------------------------------------
 
-        logging.info(f"⚙️ Processing: {file_name}")
+        logging.info(f"Processing: {file_name}")
 
         # Only loads into memory if it actually needs to be processed
         df = pd.read_parquet(file_path)
@@ -362,15 +362,15 @@ def main():
             # 2. Stateful Processing (Drift Check)
             if is_cold_start:
                 logging.info(
-                    f"   -> Skipping drift detection for {batch_year} (building baseline)."
+                    f"Skipping drift detection for {batch_year} (building baseline)."
                 )
             else:
-                logging.info(f"   -> Validating {batch_year} against history...")
+                logging.info(f"Validating {batch_year} against history...")
                 _monitor_data_drift(df_validated, batch_year, df_historical_reference)
 
             # 3. Save as a partitioned file
             df_validated.to_parquet(expected_silver_path, index=False)
-            logging.info(f"🎉 Saved partitioned file: {expected_silver_path}")
+            logging.info(f"Saved partitioned file: {expected_silver_path}")
 
             # 4. Update the reference dataframe in memory for subsequent files in this batch
             if df_historical_reference.empty:
@@ -384,10 +384,10 @@ def main():
                     )
 
         except pa.errors.SchemaError as e:
-            logging.error(f"❌ Schema Validation Error in {file_name}: {e}")
+            logging.error(f"Schema Validation Error in {file_name}: {e}")
             raise e
 
-    logging.info("✅ Bronze to Silver pipeline completed successfully.")
+    logging.info("Bronze to Silver pipeline completed successfully.")
 
 
 if __name__ == "__main__":
