@@ -211,8 +211,12 @@ __marimo__/
 
 
 # Project specific data
+data/00_landing/*
+data/01_bronze/*
 data/02_silver/*
 data/03_gold/*
+data/99_archive/*
+data/reports
 !data/02_silver/.gitkeep
 !data/03_gold/.gitkeep
 
