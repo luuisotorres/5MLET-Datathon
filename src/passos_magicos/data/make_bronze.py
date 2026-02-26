@@ -50,5 +50,6 @@ def main():
         except Exception as e:
             logging.error(f"Error processing file {file_name}: {e}")
 
+
 if __name__ == "__main__":
     main()

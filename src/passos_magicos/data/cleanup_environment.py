@@ -6,8 +6,7 @@ from passos_magicos.core.paths import ProjectPaths as PP
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
@@ -51,9 +50,7 @@ def main():
     clean_parquet_files(PP.ARCHIVE_DIR)
     clean_database(PP.ONLINE_STORE_DB)
 
-    logging.info(
-        "Cleanup completed! Environment is ready for a fresh pipeline run."
-    )
+    logging.info("Cleanup completed! Environment is ready for a fresh pipeline run.")
 
 
 if __name__ == "__main__":

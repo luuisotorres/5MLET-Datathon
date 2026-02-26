@@ -45,7 +45,6 @@ def engineer_features_and_target(df: pd.DataFrame) -> pd.DataFrame:
     # Groups by RA, gets the 'Defasagem' of the next row (next year)
     df[FN.TARGET_DEFASAGEM] = df.groupby(FN.RA)[FN.DEFASAGEM].shift(-1)
 
-
     return df
 
 

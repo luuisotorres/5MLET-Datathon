@@ -294,9 +294,7 @@ def _monitor_data_drift(
         tests = results["tests"]
         failed_tests = [test for test in tests if test["status"] == "FAIL"]
         if len(failed_tests) > 0:
-            logging.warning(
-                f"Data Drift detected! Check the report at: {report_path}"
-            )
+            logging.warning(f"Data Drift detected! Check the report at: {report_path}")
         else:
             logging.info("Data distribution is stable. No drift detected.")
 
@@ -322,9 +320,7 @@ def main():
     is_cold_start = df_historical_reference.empty
 
     if is_cold_start:
-        logging.info(
-            "COLD START DETECTED: Silver layer is empty. Building baseline."
-        )
+        logging.info("COLD START DETECTED: Silver layer is empty. Building baseline.")
     else:
         logging.info("INCREMENTAL LOAD DETECTED: Existing Silver data found.")
 
