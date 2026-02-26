@@ -91,7 +91,7 @@ def main():
         signature = mlflow.models.infer_signature(X_train, pipeline.predict(X_train))
         mlflow.sklearn.log_model(
             sk_model=pipeline,
-            artifact_path="model",
+            name="model",
             signature=signature,
             registered_model_name=config.get('registered_model_name'),
             input_example=X_train.iloc[:5]
