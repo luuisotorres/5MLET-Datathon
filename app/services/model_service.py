@@ -9,65 +9,33 @@ from app.config import settings
 # Logging Configuration
 logger = logging.getLogger(__name__)
 
+
 class ModelService:
     """
     Service responsible for the model lifecycle:
-    Training, Promotion, Feature Preparation (via SQLite), and Metadata Extraction.
+    Training and Feature Preparation (via SQLite), and Metadata Extraction.
     """
 
     @staticmethod
-    def train_only():
+    def train():
         """
         Executes the training pipeline via a subprocess.
-        Does not perform automatic promotion, allowing for manual evaluation in MLflow.
         """
         try:
             logger.info("Starting background training process via 'make train'...")
-            
+
             # Execute training script defined in the Makefile
-            # This registers a new version in MLflow but leaves it in stage 'None'
-            result = subprocess.run(["make", "train"], check=True, capture_output=True, text=True)
-            
+            result = subprocess.run(
+                ["make", "train"], check=True, capture_output=True, text=True
+            )
+
             logger.info("Training script executed successfully.")
             logger.info(f"Subprocess output: {result.stdout}")
-            
+
         except subprocess.CalledProcessError as e:
             logger.error(f"Training failure: {e.stderr}")
         except Exception as e:
             logger.exception(f"Unexpected error during training: {str(e)}")
-
-    @staticmethod
-    def promote_by_run_id(run_id: str):
-        """
-        Promotes a specific MLflow Run ID to the 'Production' stage and archives the previous one.
-        """
-        client = MlflowClient()
-        model_name = settings.model_name
-
-        # Search for the model version associated with the provided run_id
-        search_filter = f"run_id='{run_id}'"
-        versions = client.search_model_versions(f"name='{model_name}' and {search_filter}")
-
-        if not versions:
-            raise Exception(f"No model version found for Run ID: {run_id}")
-
-        version_to_promote = versions[0].version
-
-        # Step 1: Archive all current production versions
-        current_prod = client.get_latest_versions(model_name, stages=["Production"])
-        for v in current_prod:
-            logger.info(f"Archiving version {v.version}")
-            client.transition_model_version_stage(
-                name=model_name, version=v.version, stage="Archived"
-            )
-
-        # Step 2: Promote the selected version to Production
-        client.transition_model_version_stage(
-            name=model_name, version=version_to_promote, stage="Production"
-        )
-        
-        logger.info(f"✅ Version {version_to_promote} successfully promoted to Production.")
-        return version_to_promote
 
     @staticmethod
     def prepare_student_features_from_db(ra: str):
@@ -77,7 +45,7 @@ class ModelService:
         db_path = "feature_store_online.db"
         try:
             conn = sqlite3.connect(db_path)
-            
+
             # Querying the 'aluno_features' table
             query = "SELECT * FROM aluno_features WHERE RA = ?"
             student_data = pd.read_sql_query(query, conn, params=(str(ra),))
@@ -89,16 +57,25 @@ class ModelService:
 
             # Feature list must match the model's expected input schema
             required_features = [
-                'RA', 'ano_dados', 'fase', 'idade', 'genero', 
-                'anos_na_instituicao', 'instituicao', 'inde_atual', 
-                'indicador_auto_avaliacao', 'indicador_engajamento', 
-                'indicador_psicossocial', 'indicador_aprendizagem', 
-                'indicador_ponto_virada', 'indicador_adequacao_nivel', 
-                'indicador_psico_pedagogico'
+                "RA",
+                "ano_dados",
+                "fase",
+                "idade",
+                "genero",
+                "anos_na_instituicao",
+                "instituicao",
+                "inde_atual",
+                "indicador_auto_avaliacao",
+                "indicador_engajamento",
+                "indicador_psicossocial",
+                "indicador_aprendizagem",
+                "indicador_ponto_virada",
+                "indicador_adequacao_nivel",
+                "indicador_psico_pedagogico",
             ]
-            
+
             return student_data[required_features].tail(1)
-            
+
         except Exception as e:
             logger.error(f"Error accessing SQLite Feature Store: {str(e)}")
             return None
@@ -118,7 +95,7 @@ class ModelService:
             # Navigating through MLflow wrapper to find the core estimator
             if hasattr(model, "_model_impl"):
                 run_id = getattr(model._model_impl, "run_id", "N/A")
-                
+
                 if hasattr(model._model_impl, "sklearn_model"):
                     underlying_model = model._model_impl.sklearn_model
                 elif hasattr(model._model_impl, "python_model"):
@@ -126,14 +103,14 @@ class ModelService:
                         underlying_model = model._model_impl.python_model.model
                     else:
                         underlying_model = model._model_impl.python_model
-            
+
             # Determining algorithm name and parameters
-            if hasattr(underlying_model, 'steps'):
+            if hasattr(underlying_model, "steps"):
                 step_name, estimator = underlying_model.steps[-1]
                 algorithm_name = type(estimator).__name__
                 params = estimator.get_params()
                 pipeline_steps = [s[0] for s in underlying_model.steps]
-            elif hasattr(underlying_model, 'get_params'):
+            elif hasattr(underlying_model, "get_params"):
                 algorithm_name = type(underlying_model).__name__
                 params = underlying_model.get_params()
                 pipeline_steps = []
@@ -147,7 +124,7 @@ class ModelService:
                 "algorithm": algorithm_name,
                 "pipeline_layers": pipeline_steps,
                 "model_params": params,
-                "tracking_status": "active_in_production"
+                "tracking_status": "active_in_production",
             }
 
         except Exception as e:
@@ -155,5 +132,5 @@ class ModelService:
             return {
                 "algorithm": "Unknown",
                 "error": "Extraction failure",
-                "details": str(e)
+                "details": str(e),
             }

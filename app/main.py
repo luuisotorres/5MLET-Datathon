@@ -29,12 +29,11 @@ Using Machine Learning models (Random Forest), the system analyzes psychosocial 
 ## Features
 * **General (Health Check):** System status and connectivity verification.
 * **ML Management (Train):** Triggers asynchronous model training. This stage only registers the model in MLflow for evaluation.
-* **ML Management (Promote):** Manual action to promote a specific Run ID to *Production* stage (Hot-swap enabled).
 * **ML Management (Model):** Discovery endpoint that returns hyperparameters, version, and metadata of the active model.
 * **ML Model (Predict):** Performs risk prediction fetching real-time data from the **SQLite Feature Store** based on Student RA.
 
 ## MLOps & Governance
-The model lifecycle is managed by **MLflow**, ensuring experiment traceability and automated promotion to the *Production* stage.
+The model lifecycle is managed by **MLflow**, ensuring experiment traceability and promotion to the *Production* stage.
 
 ---
 **Project developed for the Datathon - Post-Graduate Program in Machine Learning and AI**

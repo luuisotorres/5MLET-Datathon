@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
 
+
 class HealthCheckResponse(BaseModel):
     api_name: str
     version: str
@@ -9,21 +10,19 @@ class HealthCheckResponse(BaseModel):
     data_status: str
     message: str
 
+
 class ModelMetadataResponse(BaseModel):
     model_name: str
     model_alias: str
     mlflow_tracking_uri: str
     active_metadata: dict
-    model_version: str 
+    model_version: str
+
 
 class TrainingResponse(BaseModel):
     status: str
     message: str
 
-class PromotionResponse(BaseModel):
-    status: str
-    message: str
-    reloaded: bool
 
 class PredictionResponse(BaseModel):
     ra: str
