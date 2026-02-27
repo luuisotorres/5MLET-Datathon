@@ -24,7 +24,7 @@ description = """
 
 ## Overview
 This API was developed to identify the risk of academic lagging for students at the **Passos Mágicos Association**. 
-Using Machine Learning models (Random Forest), the system analyzes psychosocial and learning indicators to predict academic status.
+Using Machine Learning models (Random Forest, LightGBM, XGBoost, etc.), the system analyzes psychosocial and learning indicators to predict academic status.
 
 ## Features
 * **General (Health Check):** System status and connectivity verification.
