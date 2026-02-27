@@ -11,6 +11,8 @@ from app.routes import router as api_router
 # Import our dynamic configurations
 from app.config import settings
 
+from passos_magicos.core.paths import ProjectPaths as PP
+
 # Logging Configuration
 logging.basicConfig(
     level=logging.INFO, 
@@ -77,7 +79,7 @@ async def lifespan(app: FastAPI):
 
     # --- Step 2: Load Student Database ---
     try:
-        data_path = "data/03_gold/train_data.parquet"
+        data_path = PP.GOLD_DIR / PP.TRAINING_DATA_PARQUET_NAME
         logger.info(f"Attempting to load student database from: {data_path}")
         
         app.state.data = pd.read_parquet(data_path)

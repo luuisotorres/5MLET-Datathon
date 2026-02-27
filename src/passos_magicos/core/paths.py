@@ -17,5 +17,7 @@ class ProjectPaths:
     REPORTS_DIR = DATA_DIR / "reports"
 
     # Databases
+    TRAINING_DATA_PARQUET_NAME = "training_data.parquet"
+    OFFLINE_STORE_PARQUET_NAME = "feature_store.parquet"
     ONLINE_STORE_DB = Path("feature_store_online.db")
     MLFLOW_DB = Path("mlflow.db")
