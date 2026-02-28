@@ -1,47 +1,190 @@
-# 5MLET-Datathon - Passos Mágicos (Defasagem)
+# 5MLET-Datathon - Passos Mágicos (Student Lagging Prediction)
 
-Predicting student lag ("defasagem") for the Passos Mágicos NGO project.
+## 1. Project Overview
 
-## Project Structure
-- `src/passos_magicos`: Core logic for preprocessing, model dispatching, and training.
-- `notebooks`: Exploratory analysis and prototyping.
-- `config/config.yaml`: Central configuration for experiments.
+### Objective
+This project aims to predict the academic lagging risk ("defasagem") for students supported by the **Passos Mágicos Association**. By identifying students at risk early, the NGO can implement targeted psychosocial and pedagogical interventions.
 
-## Quick Start
+### Proposed Solution
+A complete MLOps pipeline designed to handle student data from ingestion to real-time inference:
+- **Medallion Data Pipeline**: Structured data processing through Landing, Bronze (cleaning), Silver (feature engineering & drift detection), and Gold (modeling) layers.
+- **MLOps Lifecycle**: Experiment tracking, parameter logging, and model versioning using **MLflow**.
+- **Inference Service**: A production-ready **FastAPI** application serving predictions integrated with an **SQLite Feature Store**.
+- **Observability**: Real-time service monitoring via **Prometheus** and **Grafana**, with data distribution monitoring through **Evidently AI**.
 
-### 1. Install Dependencies
-```bash
-uv sync
+### Tech Stack
+- **Python Version**: `>= 3.13`
+- **ML Frameworks**: `scikit-learn`, `XGBoost`, `LightGBM`
+- **API & Serving**: `FastAPI`, `Uvicorn`, `Pydantic`
+- **Serialization & Validation**: `Pandera` (schema enforcement), `YAML` (configuration)
+- **Tests**: `Pytest`
+- **Containerization**: `Docker`, `Docker Compose`
+- **Monitoring & Observability**: `Prometheus`, `Grafana`, `Evidently AI`
+- **Orchestration & Tooling**: `MLflow` (tracking), `UV` (dependency management), `Make` (task automation)
+
+---
+
+## 2. Project Structure
+
+```text
+├── app/                  # FastAPI Application (routes, services, schemas)
+├── config/               # Model and pipeline YAML configurations
+├── data/                 # Data lake (Landing, Bronze, Silver, Gold zones)
+├── grafana/              # Grafana dashboards and provisioning
+├── models/               # Local storage for serialized models
+├── notebooks/            # EDA and Prototyping
+├── src/passos_magicos/   # Core logic
+│   ├── core/             # Path management and global configs
+│   ├── data/             # Data pipeline scripts (Bronze, Silver, Gold)
+│   └── models/           # Training and evaluation logic
+├── tests/                # Unit and Integration tests
+├── Dockerfile            # API container specification
+├── docker-compose.yml    # Multi-container orchestration
+├── Makefile              # Automation shortcuts
+└── pyproject.toml        # Dependency definitions
 ```
 
-### 2. Run Training Pipeline
-To train a model using the configuration in `config/config.yaml` (default):
+---
+
+## 3. Deploy Instructions
+
+### Quick Start (Local)
+
+1. **Install uv**: Ensure you have [uv](https://github.com/astral-sh/uv) installed.
+2. **Initialize Environment**:
+   ```bash
+   uv sync
+   make setup
+   ```
+3. **Run Full Pipeline**: (Ingestion -> Processing -> Training)
+   ```bash
+   make train-presets
+   ```
+
+### Running with Docker
+
+To spin up the entire ecosystem (API, MLflow, Prometheus, Grafana) in one go:
 ```bash
-# Make sure you are in the project root
-uv run python -m passos_magicos.models.train
+make docker-up
+```
+The API will be available at `http://localhost:8000`, the MLflow UI at `http://localhost:5000`, Prometheus at `http://localhost:9090`, and Grafana at `http://localhost:3000`.
+
+### Model Promotion (Production)
+
+The FastAPI application is configured to load the model using the **`production`** alias. After training a model, you **must** promote it in the MLflow UI for it to be used by the API:
+
+1.  **Access MLflow**: Open `http://localhost:5000` in your browser.
+2.  **Navigate to Models**: Click on the **Models** tab in the top navigation bar.
+3.  **Select the Model**: Click on `passos_magicos_defasagem_v1`.
+4.  **Assign Alias**:
+    - Click on the **Version** number you wish to use (e.g., *Version 1*).
+    - In the **Aliases** section, click the `+` button and type `production`.
+5.  **Restart API**: The API loads the model during startup. If it was already running, restart the container or the local process to pick up the new model version.
+
+To stop the services:
+```bash
+make docker-down
 ```
 
-You can also run training with a specific configuration file:
+---
+
+## 4. API
+
+Interact with the API once it's running. Documentation is available at `http://127.0.0.1:8000/docs`.
+
+### Health Check
+**Description**: Verifies the system status, including whether the ML model and student database are correctly loaded.
 ```bash
-uv run python -m passos_magicos.models.train --config config/my_experiment_random_forest.yaml
+curl http://127.0.0.1:8000/
 ```
 
-**What happens when you run this?**
-- Loads parameters from `config/config.yaml`.
-- Preprocesses data (cleaning, feature engineering).
-- Trains the model (e.g., Random Forest, XGBoost).
-- Logs metrics, parameters, and artifacts to MLflow.
-- Registers the model as `passos_magicos_defasagem_v1`.
-
-### 3. View Results (MLflow UI)
-To visualize experiments, compare runs, and see artifacts:
+### Model Discovery
+**Description**: Retrieves metadata about the currently active model in production, including its version, alias, and hyperparameters.
 ```bash
-uv run mlflow ui
+curl http://127.0.0.1:8000/model
 ```
-Open your browser at [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
-## Configuration
-Edit `config/config.yaml` to change:
-- **Model Type**: `random_forest`, `xgboost`, `lightgbm`.
-- **Hyperparameters**: `n_estimators`, `max_depth`, etc.
-- **Features**: Add/remove features in `features` list.
+### Trigger New Training
+**Description**: Initiates the training pipeline as a background task. The model will be trained and registered in MLflow.
+```bash
+curl -X POST http://127.0.0.1:8000/train
+```
+
+### Prediction by Student RA
+**Description**: Performs a real-time risk prediction for a student using their unique RA. Features are fetched from the **SQLite Feature Store**.
+```bash
+curl -X POST http://127.0.0.1:8000/predict/1
+```
+
+---
+
+## 5. ML Pipeline Steps
+
+The pipeline follows a robust automated workflow:
+
+1. **Data Ingestion**: Historical data is landed in the `data/00_landing` zone as Excel files.
+2. **Bronze (Raw/Clean)**: Inconsistent column names are normalized, and basic type casting is performed.
+3. **Silver (Trusted)**:
+   - **Feature Engineering**: Calculates years in institution, academic indices (INDE, IPP), and encodes categorical features.
+   - **Data Drift Monitoring**: New batches are compared against the historical baseline using **Evidently AI**. Reports are saved in `data/reports`.
+4. **Gold (Aggregated)**: Data is prepared in Parquet format and synchronized with the **SQLite Feature Store** for low-latency inference.
+5. **Model Training**:
+   - Fetches the Gold dataset.
+   - Trains models (Random Forest, XGBoost, or LightGBM) based on current configuration.
+   - Logs metrics, parameters, and artifacts to **MLflow**.
+6. **Model Registry & Serving**: The best model is registered and promoted to *Production* state for the FastAPI application to consume.
+
+---
+
+## 6. Additional Usage
+
+These `make` commands provide additional shortcuts for development and maintenance:
+
+### Simulation & QA
+- **Simulate Data Drift**: Ingests 2025 data to trigger the drift detection report.
+  ```bash
+  make simulate_drift
+  ```
+- **Run Tests**: Executes the `pytest` suite.
+  ```bash
+  make test
+  ```
+
+### MLOps & Infrastructure
+- **MLflow UI**: Start the tracking server locally.
+  ```bash
+  make ui
+  ```
+
+### Model Configuration (`config.yaml`)
+
+The project uses a centralized configuration file at `config/config.yaml` to manage experiments. You can modify these parameters to test different algorithms and tuning strategies:
+
+- **MLOps & Tracking**:
+    - `experiment_name`: Grouping of related runs in MLflow.
+    - `run_name`: Specific identifier for the current training execution.
+    - `registered_model_name`: The name used in the MLflow Model Registry (consumed by the API).
+- **Data & Features**:
+    - `target_col`: The name of the column to predict (default: `target_defasagem`).
+    - `numerical`, `categorical`, `binary`: Lists of features to be included in the training pipeline.
+- **Model Selection & Tuning**:
+    - `model.type`: Choose between `"random_forest"`, `"xgboost"`, or `"lightgbm"`.
+    - `model.params`: Hyperparameters specific to the chosen algorithm (e.g., `n_estimators`, `max_depth`, `learning_rate`).
+
+**To test a new model**:
+1. Open `config/config.yaml`.
+2. Change `model.type` to your desired algorithm (e.g., `"xgboost"`).
+3. Update `model.params` with the appropriate keys for that algorithm.
+4. Run `make train` to log the new experiment to MLflow.
+
+**Advanced Training**:
+You can also run training using a specific configuration file without modifying the default one:
+```bash
+make train CONFIG=config/my_experiment.yaml
+```
+
+### Maintenance
+- **Clean Environment**: Deletes local data lake files, models, and artifacts (use with caution).
+  ```bash
+  make clean
+  ```
