@@ -13,7 +13,7 @@ services:
     depends_on:
       - prometheus
       - mlflow
-    command: sh -c "uv sync && [ ! -f feature_store_online.db ] && make all; exec uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "uv sync && [ ! -f feature_store_online.db ] && make train-presets; exec uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   mlflow:
     build: .

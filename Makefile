@@ -6,7 +6,7 @@ PORT ?= 8000
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup seed_baseline bronze silver gold data clean test simulate_drift train ui all run-api docker-up docker-down docker-restart docker-logs docker-build
+.PHONY: help setup seed_baseline bronze silver gold data clean test simulate_drift train ui run-api docker-up docker-down docker-restart docker-logs docker-build train-presets
 
 # ==============================================================================
 # Help / Information
@@ -24,7 +24,7 @@ help:
 	@echo "Data Pipeline & Training:"
 	@echo "  data            Run the full data pipeline (clean -> gold)"
 	@echo "  train           Train model using CONFIG (default: config/config.yaml)"
-	@echo "  all             Run full pipeline: data + train"
+	@echo "  train-presets   Run full pipeline: data + baseline + train (LightGBM & XGBoost)"
 	@echo ""
 	@echo "Application & MLOps Services (Local):"
 	@echo "  run-api         Start FastAPI server locally on PORT (default: 8000)"
@@ -77,7 +77,11 @@ train:
 	@echo "==> Training model with config: $(CONFIG)..."
 	uv run python -m src.passos_magicos.models.train --config $(CONFIG)
 
-all: data train
+train-presets: data
+	@echo "==> Training LightGBM model..."
+	$(MAKE) train CONFIG=config/lightgbm.yaml
+	@echo "==> Training XGBoost model..."
+	$(MAKE) train CONFIG=config/xgboost.yaml
 
 # ==============================================================================
 # Application & MLOps Services
