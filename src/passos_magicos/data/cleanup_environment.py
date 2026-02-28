@@ -61,6 +61,8 @@ def main():
 
     clean_files(PP.ARCHIVE_DIR, extension=".xlsx")
 
+    clean_files(PP.REPORTS_DIR, extension=".html")
+
     clean_database(PP.ONLINE_STORE_DB)
 
     logging.info("Cleanup completed! Environment is ready for a fresh pipeline run.")
