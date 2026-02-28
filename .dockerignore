@@ -3,10 +3,19 @@ __pycache__/
 *.pyc
 .git/
 .env
-mlflow.db
+*.db
+*.sqlite
 mlruns/
-feature_store_online.db
-data/
-models/
-notebooks/
-tests/
+
+# Data: Ignore processed layers but KEEP data/files
+data/00_landing/*
+data/01_bronze/*
+data/02_silver/*
+data/03_gold/*
+data/99_archive/*
+data/reports/
+
+# Keep these in the image for functionality/testing
+# models/
+# notebooks/
+# tests/

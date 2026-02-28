@@ -4,6 +4,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     make \
+    libgomp1 \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory

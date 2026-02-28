@@ -6,12 +6,14 @@ services:
     volumes:
       - .:/app
       - /app/.venv
+      - ./data:/app/data
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - GIT_PYTHON_REFRESH=quiet
     depends_on:
       - prometheus
       - mlflow
-    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: sh -c "uv sync && [ ! -f feature_store_online.db ] && make all; exec uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   mlflow:
     build: .
@@ -20,7 +22,9 @@ services:
     volumes:
       - ./mlflow.db:/app/mlflow.db
       - ./mlruns:/app/mlruns
-    command: uv run mlflow server --backend-store-uri sqlite:///app/mlflow.db --default-artifact-root /app/mlruns --host 0.0.0.0 --port 5000
+    environment:
+      - MLFLOW_SERVER_ALLOW_ALL_HOSTS=true
+    command: uv run mlflow server --backend-store-uri sqlite:///app/mlflow.db --default-artifact-root /app/mlruns --host 0.0.0.0 --port 5000 --allowed-hosts "*"
 
   prometheus:
     image: prom/prometheus:latest
