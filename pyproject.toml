@@ -26,6 +26,7 @@ dependencies = [
     "uvicorn>=0.40.0",
     "unidecode>=1.4.0",
     "xgboost>=3.2.0",
+    "prometheus-fastapi-instrumentator>=7.0.0",
 ]
 
 [project.scripts]

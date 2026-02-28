@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 import mlflow.pyfunc
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Centralized router import
 from app.routes import router as api_router
@@ -114,4 +115,7 @@ app = FastAPI(
 )
 
 app.include_router(api_router)
+
+# --- Prometheus Metrics ---
+Instrumentator().instrument(app).expose(app)
 
