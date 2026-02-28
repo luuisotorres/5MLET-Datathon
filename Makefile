@@ -69,3 +69,17 @@ ui:
 
 # The 'all' target runs the full pipeline from raw data to trained model
 all: data train
+
+# ==============================================================================
+# API Commands
+# ==============================================================================
+
+# Define the port as a variable so you can change it easily if needed
+PORT ?= 8000
+
+.PHONY: run-api
+
+run-api:
+	@echo "==> Starting FastAPI server on port $(PORT)..."
+	@echo "==> Swagger UI documentation will be available at http://127.0.0.1:$(PORT)/docs"
+	uv run uvicorn app.main:app --host 0.0.0.0 --port $(PORT) --reload

@@ -53,14 +53,14 @@ def save_offline_store(df: pd.DataFrame, gold_dir: Path):
     gold_dir.mkdir(parents=True, exist_ok=True)
 
     # Feature Store (Full History)
-    feature_store_path = gold_dir / "feature_store.parquet"
+    feature_store_path = gold_dir / PP.OFFLINE_STORE_PARQUET_NAME
     df.to_parquet(feature_store_path, index=False)
     logging.info(f"Offline Feature Store saved at {feature_store_path}")
 
     # Training Data (Only rows where the Target is NOT null)
     # The last year for every student will have a NaN target (since we don't know the future yet)
     df_train = df.dropna(subset=[FN.TARGET_DEFASAGEM]).copy()
-    train_path = gold_dir / "train_data.parquet"
+    train_path = gold_dir / PP.TRAINING_DATA_PARQUET_NAME
     df_train.to_parquet(train_path, index=False)
     logging.info(
         f"Training dataset saved at {train_path} ({len(df_train)} valid transitions)"
