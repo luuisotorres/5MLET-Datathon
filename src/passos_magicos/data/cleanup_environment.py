@@ -10,14 +10,18 @@ logging.basicConfig(
 )
 
 
-def clean_parquet_files(directory: Path):
-    """Deletes all .parquet files in a given directory."""
+def clean_files(directory: Path, extension: str = ".parquet"):
+    """Deletes all files with the specified extension in a given directory."""
     if not directory.exists():
         logging.warning(f"Directory {directory} does not exist. Skipping.")
         return
 
+    # Ensure extension starts with a dot
+    if not extension.startswith("."):
+        extension = f".{extension}"
+
     count = 0
-    for file_path in directory.glob("*.parquet"):
+    for file_path in directory.glob(f"*{extension}"):
         try:
             file_path.unlink()
             count += 1
@@ -25,7 +29,7 @@ def clean_parquet_files(directory: Path):
         except Exception as e:
             logging.error(f"Failed to delete {file_path.name}: {e}")
 
-    logging.info(f"Cleared {count} files from {directory.name}")
+    logging.info(f"Cleared {count} {extension} files from {directory.name}")
 
 
 def clean_database(db_path: Path):
@@ -43,11 +47,20 @@ def clean_database(db_path: Path):
 def main():
     logging.info("Starting data cleanup process...")
 
-    clean_parquet_files(PP.LANDING_DIR)
-    clean_parquet_files(PP.BRONZE_DIR)
-    clean_parquet_files(PP.SILVER_DIR)
-    clean_parquet_files(PP.GOLD_DIR)
-    clean_parquet_files(PP.ARCHIVE_DIR)
+    # Clean parquet files from all data directories
+    data_dirs = [
+        PP.LANDING_DIR,
+        PP.BRONZE_DIR,
+        PP.SILVER_DIR,
+        PP.GOLD_DIR,
+        PP.ARCHIVE_DIR,
+    ]
+
+    for directory in data_dirs:
+        clean_files(directory, extension=".parquet")
+
+    clean_files(PP.ARCHIVE_DIR, extension=".xlsx")
+
     clean_database(PP.ONLINE_STORE_DB)
 
     logging.info("Cleanup completed! Environment is ready for a fresh pipeline run.")
