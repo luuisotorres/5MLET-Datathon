@@ -8,9 +8,12 @@ import mlflow.pyfunc
 # Centralized router import
 from app.routes import router as api_router
 
+from app.services.model_provider import MLflowModelProvider
+from app.services.model_service import ModelService
+from app.services.feature_service import FeatureService
+
 # Import our dynamic configurations
 from app.config import settings
-
 from passos_magicos.core.paths import ProjectPaths as PP
 
 # Logging Configuration
@@ -19,6 +22,11 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# Initialize Services
+provider = MLflowModelProvider()
+model_service = ModelService(provider)
+feature_service = FeatureService()
 
 # --- Swagger Description (Markdown) ---
 description = """
@@ -52,32 +60,26 @@ The model lifecycle is managed by **MLflow**, ensuring experiment traceability a
 async def lifespan(app: FastAPI):
     """
     API lifespan manager.
-    Attempts to load the model from MLflow and the student database from disk. 
+    Attempts to load the model from the provider and the student database from disk. 
     """
     logger.info("Starting the Passos Mágicos API...")
 
-    # --- Step 1: Load Model from MLflow ---
-    mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
-    model_uri = f"models:/{settings.model_name}@{settings.model_alias}"
+    # Inject services into app state
+    app.state.model_service = model_service
+    app.state.feature_service = feature_service
 
+    # --- Step 1: Load Model ---
     try:
-        logger.info(f"Attempting to load model from URI: {model_uri}")
-        app.state.model = mlflow.pyfunc.load_model(model_uri)
-        logger.info("✅ Model loaded successfully! API is ready for inference.")
-
+        app.state.model = model_service.load_active_model()
+        if app.state.model:
+            logger.info("✅ Model loaded successfully! API is ready for inference.")
+        else:
+            logger.warning("⚠️ Model could not be loaded on startup.")
     except Exception as e:
-        logger.warning("⚠️ " + "=" * 60)
-        logger.warning(
-            f"⚠️ WARNING: No model found with the alias '@{settings.model_alias}'."
-        )
-        logger.warning(
-            "⚠️ The API will continue running, but prediction endpoints will fail."
-        )
-        logger.warning("⚠️ STEPS TO RESOLVE: Run 'make train' and promote the model in MLflow UI.")
-        logger.warning("⚠️ " + "=" * 60)
+        logger.error(f"❌ Failed to load model: {str(e)}")
         app.state.model = None
 
-    # --- Step 2: Load Student Database ---
+    # --- Step 2: Load Student Database (Fallback Cache) ---
     try:
         data_path = PP.GOLD_DIR / PP.TRAINING_DATA_PARQUET_NAME
         logger.info(f"Attempting to load student database from: {data_path}")
@@ -86,10 +88,7 @@ async def lifespan(app: FastAPI):
         logger.info(f"✅ Student database loaded successfully! ({len(app.state.data)} records)")
         
     except Exception as e:
-        logger.warning("⚠️ " + "=" * 60)
         logger.warning(f"⚠️ WARNING: Could not load student database: {e}")
-        logger.warning("⚠️ Ensure you have run 'make_gold.py' to generate the data files.")
-        logger.warning("⚠️ " + "=" * 60)
         app.state.data = None
 
     yield
@@ -108,7 +107,7 @@ app = FastAPI(
     lifespan=lifespan,
     openapi_tags=[
         {"name": "General", "description": "Utility endpoints and system status."},
-        {"name": "ML Management", "description": "Model lifecycle operations: Training and Discovery."},
+        {"name": "ML Management", "description": "Model lifecycle operations: Training, Discovery and Reloading."},
         {"name": "ML Model", "description": "Core inference endpoints for lagging risk prediction."}
     ]
 )
