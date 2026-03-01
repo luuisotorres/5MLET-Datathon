@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.env
+*.db
+*.sqlite
+mlruns/
+
+# Data: Ignore processed layers but KEEP data/files
+data/00_landing/*
+data/01_bronze/*
+data/02_silver/*
+data/03_gold/*
+data/99_archive/*
+data/reports/
+
+# Keep these in the image for functionality/testing
+# models/
+# notebooks/
+# tests/

@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 import mlflow.pyfunc
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Centralized router import
 from app.routes import router as api_router
@@ -77,6 +78,14 @@ async def lifespan(app: FastAPI):
             logger.warning("⚠️ Model could not be loaded on startup.")
     except Exception as e:
         logger.error(f"❌ Failed to load model: {str(e)}")
+        logger.warning("⚠️ " + "=" * 60)
+        logger.warning(
+            f"⚠️ API could not find model '{settings.model_name}' with alias '@{settings.model_alias}'."
+        )
+        logger.warning(
+            "⚠️ Ensure the model is registered and the alias is assigned in MLflow UI."
+        )
+        logger.warning("⚠️ " + "=" * 60)
         app.state.model = None
 
     # --- Step 2: Load Student Database (Fallback Cache) ---
@@ -113,4 +122,7 @@ app = FastAPI(
 )
 
 app.include_router(api_router)
+
+# --- Prometheus Metrics ---
+Instrumentator().instrument(app).expose(app)
 

@@ -4,7 +4,7 @@ registered_model_name: "passos_magicos_defasagem_v1"
 random_state: 42
 
 data:
-  input_path: "data/03_gold/train_data.parquet"
+  input_path: "data/03_gold/training_data.parquet"
   target_col: "target_defasagem"
   filter_year_train: 2022
   filter_year_test: 2023
