@@ -223,3 +223,4 @@ data/reports
 *.db
 *.sqlite
 mlruns/
+mlflow_data/
