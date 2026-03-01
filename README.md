@@ -24,12 +24,22 @@ A complete MLOps pipeline designed to handle student data from ingestion to real
 
 ---
 
-## 2. Project Structure
+## 2. Documentation
+
+For deep dives into specific parts of the project, refer to the following documentation:
+
+- 🏗️ **[Data Pipeline](docs/data_pipeline.md)**: Details on the Medallion architecture (Bronze, Silver, Gold), cleaning rules, and data drift monitoring.
+- 🧠 **[Model Training](docs/model_training.md)**: Information on preprocessing, the Model Factory, and the MLflow lifecycle.
+
+---
+
+## 3. Project Structure
 
 ```text
 ├── app/                  # FastAPI Application (routes, services, schemas)
 ├── config/               # Model and pipeline YAML configurations
 ├── data/                 # Data lake (Landing, Bronze, Silver, Gold zones)
+├── docs/                 # Detailed documentation (Data Pipeline, Training)
 ├── grafana/              # Grafana dashboards and provisioning
 ├── models/               # Local storage for serialized models
 ├── notebooks/            # EDA and Prototyping
@@ -46,7 +56,7 @@ A complete MLOps pipeline designed to handle student data from ingestion to real
 
 ---
 
-## 3. Deploy Instructions
+## 4. Deploy Instructions
 
 ### Quick Start (Local)
 
@@ -88,7 +98,7 @@ make docker-down
 
 ---
 
-## 4. API
+## 5. API
 
 Interact with the API once it's running. Documentation is available at `http://127.0.0.1:8000/docs`.
 
@@ -118,7 +128,7 @@ curl -X POST http://127.0.0.1:8000/predict/1
 
 ---
 
-## 5. ML Pipeline Steps
+## 6. ML Pipeline Steps
 
 The pipeline follows a robust automated workflow:
 
@@ -136,7 +146,7 @@ The pipeline follows a robust automated workflow:
 
 ---
 
-## 6. Additional Usage
+## 7. Additional Usage
 
 These `make` commands provide additional shortcuts for development and maintenance:
 
@@ -158,7 +168,11 @@ These `make` commands provide additional shortcuts for development and maintenan
 
 ### Model Configuration (`config.yaml`)
 
-The project uses a centralized configuration file at `config/config.yaml` to manage experiments. You can modify these parameters to test different algorithms and tuning strategies:
+The project uses a centralized configuration file at `config/config.yaml` to manage experiments.
+
+Centralizing parameters in a YAML file promotes decoupling between the model's logic and its hyperparameters. This ensures experiment reproducibility, facilitates audit trails within MLflow, and provides a single source of truth for the entire training pipeline without requiring code changes.
+
+You can modify these parameters to test different algorithms and tuning strategies:
 
 - **MLOps & Tracking**:
     - `experiment_name`: Grouping of related runs in MLflow.
@@ -188,3 +202,32 @@ make train CONFIG=config/my_experiment.yaml
   ```bash
   make clean
   ```
+
+---
+
+## 8. Future Implementations
+
+To further mature the platform, the following points are planned for future development:
+
+- **☁️ Cloud Ingestion & Storage**: Transition from local filesystem to **S3/GCS** for the Medallion architecture (Bronze/Silver/Gold) to ensure scalability.
+- **🧪 Automated Hyperparameter Tuning**: Integrate **Optuna** into the `train.py` script to automatically search for the best configuration for each model type.
+- **📊 Advanced Drift Monitoring**: Export **Evidently AI** metrics to **Prometheus** to enable real-time alerting in **Grafana** whenever data drift is detected.
+- **🛡️ API Security**: Implement **JWT (JSON Web Token)** authentication to secure the inference and training endpoints.
+- **🔄 Continuous Training (CT)**: Build a fully automated pipeline where drift detection or model performance decay triggers a new training run and registration in MLflow.
+
+---
+
+## 9. Authors
+
+Developed for FIAP - Tech Challenge 4 (ML Engineering Postgraduate Program).
+
+* Izabelly de Oliveira Menezes | [Github](https://github.com/izabellyomenezes)
+* Larissa Diniz da Silva | [Github](https://github.com/Ldiniz737)
+* Luis Fernando Torres | [Github](https://github.com/luuisotorres)
+* Rafael dos Santos Callegari | [Github](https://github.com/rafaelcallegari)
+* Renato Massamitsu Zama Inomata | [Github](https://github.com/renatoinomata)
+---
+
+## 10. License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
