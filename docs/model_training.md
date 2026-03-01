@@ -40,9 +40,9 @@ The raw `target_defasagem` represents the academic delay in years (e.g., -2 mean
 
 ### 🧼 Preprocessing
 The model uses a Scikit-Learn **Pipeline** to ensure that all transformations applied during training are identical during inference:
-- **Numerical Features**: Scaling (StandardScaler) + Simple Imputer (Mean).
-- **Categorical Features**: One-Hot Encoding (OHE) + Simple Imputer (Constant).
-- **Clipping**: Indicator values (INDE, IPP, etc.) are clipped within the [0, 10] range to avoid outlier influence.
+- **Numerical Features**: Dropping NaN values + maintains original scale, due to robust algorithms (Random Forest, XGBoost, LightGBM).
+- **Categorical Features**: One-Hot Encoding (OHE).
+- **Clipping**: Indicator values (INDE, IPP, etc.) are clipped within the [0, 10] range to fix possible entry errors.
 
 ---
 

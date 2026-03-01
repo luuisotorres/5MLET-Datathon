@@ -3,7 +3,7 @@
 ## 1. Project Overview
 
 ### Objective
-This project aims to predict the academic lagging risk ("defasagem") for students supported by the **Passos Mágicos Association**. By identifying students at risk early, the NGO can implement targeted psychosocial and pedagogical interventions.
+This project aims to predict the academic lagging risk (`defasagem`) for students supported by the **Passos Mágicos Association**. By identifying students at risk early, the NGO can implement targeted psychosocial and pedagogical interventions.
 
 ### Proposed Solution
 A complete MLOps pipeline designed to handle student data from ingestion to real-time inference:
