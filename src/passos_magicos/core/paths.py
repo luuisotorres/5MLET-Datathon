@@ -20,4 +20,5 @@ class ProjectPaths:
     TRAINING_DATA_PARQUET_NAME = "training_data.parquet"
     OFFLINE_STORE_PARQUET_NAME = "feature_store.parquet"
     ONLINE_STORE_DB = Path("feature_store_online.db")
-    MLFLOW_DB = Path("mlflow.db")
+    MLFLOW_DATA_DIR = Path("mlflow_data")
+    MLFLOW_DB = MLFLOW_DATA_DIR / "mlflow.db"

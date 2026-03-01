@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 import mlflow.pyfunc
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Centralized router import
 from app.routes import router as api_router
@@ -59,6 +60,10 @@ async def lifespan(app: FastAPI):
     # --- Step 1: Load Model from MLflow ---
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
     model_uri = f"models:/{settings.model_name}@{settings.model_alias}"
+    
+    logger.info(f"MLflow Tracking URI: {settings.mlflow_tracking_uri}")
+    logger.info(f"Target Model Name: {settings.model_name}")
+    logger.info(f"Target Alias: {settings.model_alias}")
 
     try:
         logger.info(f"Attempting to load model from URI: {model_uri}")
@@ -66,14 +71,14 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Model loaded successfully! API is ready for inference.")
 
     except Exception as e:
+        logger.error(f"❌ Failed to load model: {str(e)}")
         logger.warning("⚠️ " + "=" * 60)
         logger.warning(
-            f"⚠️ WARNING: No model found with the alias '@{settings.model_alias}'."
+            f"⚠️ API could not find model '{settings.model_name}' with alias '@{settings.model_alias}'."
         )
         logger.warning(
-            "⚠️ The API will continue running, but prediction endpoints will fail."
+            "⚠️ Ensure the model is registered and the alias is assigned in MLflow UI."
         )
-        logger.warning("⚠️ STEPS TO RESOLVE: Run 'make train' and promote the model in MLflow UI.")
         logger.warning("⚠️ " + "=" * 60)
         app.state.model = None
 
@@ -114,4 +119,7 @@ app = FastAPI(
 )
 
 app.include_router(api_router)
+
+# --- Prometheus Metrics ---
+Instrumentator().instrument(app).expose(app)
 
