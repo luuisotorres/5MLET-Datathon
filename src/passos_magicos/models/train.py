@@ -1,4 +1,3 @@
-import os
 import argparse
 import pandas as pd
 import mlflow
@@ -27,10 +26,6 @@ def main():
     pprint(config)
 
     # 2. Setup MLflow
-    mlflow_uri = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
-    mlflow.set_tracking_uri(mlflow_uri)
-    print(f"MLflow Tracking URI: {mlflow_uri}")
-    
     mlflow.set_experiment(config['experiment_name'])
     
     with mlflow.start_run(run_name=config.get('run_name', 'default_run')) as run:

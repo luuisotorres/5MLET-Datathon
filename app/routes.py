@@ -73,14 +73,12 @@ def get_active_model_info(request: Request):
 
     try:
         from mlflow.tracking import MlflowClient
-        client = MlflowClient(tracking_uri=settings.mlflow_tracking_uri)
-        
-        # Discovery based on Alias (Modern MLflow approach)
-        model_version_details = client.get_model_version_by_alias(
-            name=settings.model_name, 
-            alias=settings.model_alias
+
+        client = MlflowClient()
+        latest_versions = client.get_latest_versions(
+            settings.model_name, stages=["Production"]
         )
-        current_version = model_version_details.version if model_version_details else "N/A"
+        current_version = latest_versions[0].version if latest_versions else "1"
     except Exception:
         current_version = "N/A"
     # ---------------------------------------
