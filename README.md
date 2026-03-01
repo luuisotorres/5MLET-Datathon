@@ -5,6 +5,12 @@
 ### Objective
 This project aims to predict the academic lagging risk ("defasagem") for students supported by the **Passos Mágicos Association**. By identifying students at risk early, the NGO can implement targeted psychosocial and pedagogical interventions.
 
+### Model Output & Categories
+The model prioritizes students by classifying them into one of three distinct risk statuses:
+- **Critical (Severe Lagging)**: Students with high probability of significant academic delay.
+- **Alert (Lagging Risk)**: Students showing early warning signs of falling behind.
+- **Expected Performance**: Students meeting or exceeding academic expectations for their level.
+
 ### Proposed Solution
 A complete MLOps pipeline designed to handle student data from ingestion to real-time inference:
 - **Medallion Data Pipeline**: Structured data processing through Landing, Bronze (cleaning), Silver (feature engineering & drift detection), and Gold (modeling) layers.
@@ -27,7 +33,10 @@ A complete MLOps pipeline designed to handle student data from ingestion to real
 ## 2. Project Structure
 
 ```text
-├── app/                  # FastAPI Application (routes, services, schemas)
+├── app/                  # FastAPI Application
+│   ├── services/         # Business logic (ModelProvider, FeatureService)
+│   ├── routes.py         # API endpoints
+│   └── main.py           # App entry point & service injection
 ├── config/               # Model and pipeline YAML configurations
 ├── data/                 # Data lake (Landing, Bronze, Silver, Gold zones)
 ├── grafana/              # Grafana dashboards and provisioning
@@ -79,7 +88,9 @@ The FastAPI application is configured to load the model using the **`production`
 4.  **Assign Alias**:
     - Click on the **Version** number you wish to use (e.g., *Version 1*).
     - In the **Aliases** section, click the `+` button and type `production`.
-5.  **Restart API**: The API loads the model during startup. If it was already running, restart the container or the local process to pick up the new model version.
+5.  **Reload API**: The API loads the model during startup. However, you can update the model in memory without a restart:
+    - Use the **`POST /model/reload`** endpoint (see API section below).
+    - If you prefer a full reset, restart the container or the local process.
 
 To stop the services:
 ```bash
@@ -114,6 +125,12 @@ curl -X POST http://127.0.0.1:8000/train
 **Description**: Performs a real-time risk prediction for a student using their unique RA. Features are fetched from the **SQLite Feature Store**.
 ```bash
 curl -X POST http://127.0.0.1:8000/predict/1
+```
+
+### Dynamic Model Reload
+**Description**: Reloads the active model from the provider (MLflow) into memory without restarting the application.
+```bash
+curl -X POST http://127.0.0.1:8000/model/reload
 ```
 
 ---

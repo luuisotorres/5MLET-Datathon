@@ -1,8 +1,6 @@
 import logging
-import mlflow.pyfunc
 from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
 from app.config import settings
-from app.services.model_service import ModelService
 from app.requests import (
     HealthCheckResponse,
     ModelMetadataResponse,
@@ -25,7 +23,6 @@ async def root(request: Request):
     """
     Root endpoint for health checks.
     """
-    # Acessamos o state através do objeto request
     model_status = (
         "Loaded and Operational"
         if getattr(request.app.state, "model", None) is not None
@@ -49,12 +46,12 @@ async def root(request: Request):
 
 
 @router.post("/train", tags=["ML Management"], response_model=TrainingResponse)
-async def train_model(background_tasks: BackgroundTasks):
+async def train_model(request: Request, background_tasks: BackgroundTasks):
     """
     Triggers the model training pipeline in the background.
     """
-
-    background_tasks.add_task(ModelService.train)
+    model_service = request.app.state.model_service
+    background_tasks.add_task(model_service.train)
 
     return {
         "status": "Started",
@@ -62,28 +59,35 @@ async def train_model(background_tasks: BackgroundTasks):
     }
 
 
+@router.post("/model/reload", tags=["ML Management"])
+async def reload_model(request: Request):
+    """
+    Reloads the model from the provider without restarting the API.
+    """
+    model_service = request.app.state.model_service
+    try:
+        new_model = model_service.load_active_model()
+        if new_model:
+            request.app.state.model = new_model
+            version = model_service.get_model_version()
+            return {"status": "Success", "message": "Model reloaded successfully.", "version": version}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to load model from provider.")
+    except Exception as e:
+        logger.exception("Reload error")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/model", tags=["ML Management"], response_model=ModelMetadataResponse)
 def get_active_model_info(request: Request):
     model = getattr(request.app.state, "model", None)
+    model_service = request.app.state.model_service
 
     if model is None:
         raise HTTPException(status_code=503, detail="No model loaded.")
 
-    metadata = ModelService.get_model_metadata(model)
-
-    try:
-        from mlflow.tracking import MlflowClient
-        client = MlflowClient(tracking_uri=settings.mlflow_tracking_uri)
-        
-        # Discovery based on Alias (Modern MLflow approach)
-        model_version_details = client.get_model_version_by_alias(
-            name=settings.model_name, 
-            alias=settings.model_alias
-        )
-        current_version = model_version_details.version if model_version_details else "N/A"
-    except Exception:
-        current_version = "N/A"
-    # ---------------------------------------
+    metadata = model_service.get_model_metadata(model)
+    current_version = model_service.get_model_version()
 
     return {
         "model_name": settings.model_name,
@@ -98,13 +102,12 @@ def get_active_model_info(request: Request):
 def predict_by_ra(ra: str, request: Request):
     """
     Performs prediction based on Student RA. Fetches data from the Feature Store (SQLite).
-    Pydantic validates that the response contains all fields, including 'category'.
     """
     if request.app.state.model is None:
         raise HTTPException(status_code=503, detail="Model not loaded.")
 
-    # Search in SQLite (using 'aluno_features' table as previously adjusted)
-    features = ModelService.prepare_student_features_from_db(ra)
+    feature_service = request.app.state.feature_service
+    features = feature_service.get_student_features(ra)
 
     if features is None:
         raise HTTPException(
@@ -116,7 +119,7 @@ def predict_by_ra(ra: str, request: Request):
         prediction = request.app.state.model.predict(features)
         prediction_value = int(prediction[0])
 
-        # Mapping to populate the 'category' field required by Pydantic
+        # Mapping to populate the 'category' field
         target_map = {
             0: "Critical (Severe Lagging)",
             1: "Alert (Lagging Risk)",
@@ -125,7 +128,6 @@ def predict_by_ra(ra: str, request: Request):
 
         category_msg = target_map.get(prediction_value, "Unknown Status")
 
-        # Return validated by PredictionResponse schema
         return {
             "ra": ra,
             "prediction_code": prediction_value,
