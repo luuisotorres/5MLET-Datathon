@@ -6,7 +6,7 @@ class ModelFactory:
     "Factory class to instantiate machine learning models"
 
     @staticmethod
-    def get_model(model_type: str, params: dict = None):
+    def get_model(model_type: str, params: dict | None = None):
         """
         Creates and returns a model instance based on the model_type.
         
