@@ -1,5 +1,5 @@
-from sklearn.metrics import classification_report, confusion_matrix
-from typing import Dict, Any, Tuple
+from sklearn.metrics import classification_report
+from typing import Dict, Tuple
 
 def evaluate_model(y_true, y_pred) -> Tuple[Dict[str, float], str]:
     """

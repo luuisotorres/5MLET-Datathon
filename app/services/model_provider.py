@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import mlflow.pyfunc
 from mlflow.tracking import MlflowClient

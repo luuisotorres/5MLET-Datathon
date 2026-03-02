@@ -3,7 +3,6 @@ import pandas as pd
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-import mlflow.pyfunc
 from prometheus_fastapi_instrumentator import Instrumentator
 
 # Centralized router import

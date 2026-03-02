@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch
 from passos_magicos.data.setup import main
 

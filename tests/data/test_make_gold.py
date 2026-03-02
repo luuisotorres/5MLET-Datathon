@@ -1,6 +1,5 @@
 import pandas as pd
 import pytest
-from pathlib import Path
 
 from passos_magicos.data.constants import FeatureNames as FN
 from passos_magicos.data.make_gold import (

@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import pytest
 
 # Imports for data cleaning functions
 from passos_magicos.data.preprocessing import (

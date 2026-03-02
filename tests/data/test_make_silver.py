@@ -1,6 +1,5 @@
 import pytest
 import pandas as pd
-import numpy as np
 
 from passos_magicos.data.make_silver import (
     _find_and_assign,

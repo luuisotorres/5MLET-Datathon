@@ -42,4 +42,6 @@ packages = ["src/passos_magicos", "app"]
 [dependency-groups]
 dev = [
     "ipykernel>=7.2.0",
+    "mypy>=1.19.1",
+    "ruff>=0.15.4",
 ]
