@@ -2,7 +2,6 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 import pandas as pd
-from app.main import app
 
 with (
     patch("app.services.model_provider.MLflowModelProvider"),
