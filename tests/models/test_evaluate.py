@@ -1,5 +1,3 @@
-import pytest
-import pandas as pd
 from passos_magicos.models.evaluate import evaluate_model
 
 def test_evaluate_model():

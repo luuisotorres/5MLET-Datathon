@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint & Format (Ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - run: uv sync
+      - name: Ruff Check
+        run: uv run ruff check .
+
+  type-check:
+    name: Static Type Checking (Mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - run: uv sync
+      - name: Mypy Check
+        run: uv run mypy --install-types --non-interactive src/ app/
+
+  test:
+    name: Unit Tests (Pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - run: uv sync
+      - name: Run Pytest
+        run: make test

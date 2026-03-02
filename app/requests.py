@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional
+from pydantic import BaseModel
+from typing import Dict
 
 
 class HealthCheckResponse(BaseModel):

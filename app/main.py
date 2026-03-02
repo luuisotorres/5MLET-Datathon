@@ -3,7 +3,6 @@ import pandas as pd
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-import mlflow.pyfunc
 from prometheus_fastapi_instrumentator import Instrumentator
 
 # Centralized router import
@@ -24,10 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Initialize Services
-provider = MLflowModelProvider()
-model_service = ModelService(provider)
-feature_service = FeatureService()
+# --- Application Instance ---
 
 # --- Swagger Description (Markdown) ---
 description = """
@@ -64,6 +60,11 @@ async def lifespan(app: FastAPI):
     Attempts to load the model from the provider and the student database from disk. 
     """
     logger.info("Starting the Passos Mágicos API...")
+
+    # Initialize Services inside lifespan to avoid top-level side effects
+    provider = MLflowModelProvider()
+    model_service = ModelService(provider)
+    feature_service = FeatureService()
 
     # Inject services into app state
     app.state.model_service = model_service
