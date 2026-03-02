@@ -6,33 +6,47 @@ on:
       - main
 
 jobs:
-  test:
-    name: Run Tests
+  lint:
+    name: Lint & Format (Ruff)
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-          version: "latest"
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version-file: ".python-version"
+      - run: uv sync
+      - name: Ruff Check
+        run: uv run ruff check .
 
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Code Quality (Linting & Formatting)
-        run: uv run ruff check . --exclude "*.ipynb"
-
-      - name: Static Type Checking
+  type-check:
+    name: Static Type Checking (Mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - run: uv sync
+      - name: Mypy Check
         run: uv run mypy --install-types --non-interactive src/ app/
 
-      - name: Run Tests
+  test:
+    name: Unit Tests (Pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - run: uv sync
+      - name: Run Pytest
         run: make test
