@@ -205,7 +205,43 @@ make train CONFIG=config/my_experiment.yaml
 
 ---
 
-## 8. Future Implementations
+## 8. Continuous Integration (CI)
+
+This project uses **GitHub Actions** to maintain high code quality and prevent the introduction of bugs. Every Pull Request to the `main` branch triggers an automated pipeline that performs the following checks:
+
+### CI Pipeline Components
+
+1.  **[uv](https://github.com/astral-sh/uv)**: Used for high-speed dependency management. The CI environment is synced using `uv sync` to ensure it matches the local environment.
+2.  **[Ruff](https://github.com/astral-sh/ruff)**: An extremely fast Python linter. It checks for style violations, unused imports, and common coding errors.
+3.  **[Mypy](https://mypy.readthedocs.io/)**: A static type checker that enforces type safety based on Python's type hints, catching logical errors early.
+4.  **[Pytest](https://docs.pytest.org/)**: Executes the project's test suite to ensure that new changes do not break existing functionality.
+
+### Guidelines for Contributors
+
+To ensure your changes can be merged smoothly, follow these steps before opening a Pull Request:
+
+1.  **Sync Dependencies**: Ensure your environment is up to date.
+    ```bash
+    uv sync
+    ```
+2.  **Run Linting**: Clean up code style and unused imports.
+    ```bash
+    uv run ruff check . --fix
+    ```
+3.  **Check Types**: Verify type safety.
+    ```bash
+    uv run mypy src/ app/
+    ```
+4.  **Run Tests**: Confirm that all tests pass.
+    ```bash
+    make test
+    ```
+
+> ⚠️ A green checkmark from the CI environment is **required** for any Pull Request to be merged.
+
+---
+
+## 9. Future Implementations
 
 To further mature the platform, the following points are planned for future development:
 
@@ -217,7 +253,7 @@ To further mature the platform, the following points are planned for future deve
 
 ---
 
-## 9. Authors
+## 10. Authors
 
 Developed for FIAP - Tech Challenge 4 (ML Engineering Postgraduate Program).
 
@@ -228,6 +264,6 @@ Developed for FIAP - Tech Challenge 4 (ML Engineering Postgraduate Program).
 * Renato Massamitsu Zama Inomata | [Github](https://github.com/renatoinomata)
 ---
 
-## 10. License
+## 11. License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
