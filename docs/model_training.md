@@ -28,7 +28,7 @@ The dataset is split by year (not randomly row by row). This approach prevents *
 
 ### 🎯 Target Categorization (Defasagem)
 
-The raw `target_defasagem` represents the academic delay in years (e.g., -2 means a student is 2 years behind their expected grade). For the machine learning model, this is discretized into three priority classes using the `create_target_class` logic:
+The raw `target_defasagem` represents the academic delay in years (e.g., -2 indicates a student is two years behind their expected grade level). The project was structured as a multiclass classification task to distinguish between varying degrees of academic lagging. This approach ensures that students with severe delays are identified separately from those with minor laggings, enabling more precise and prioritized pedagogical interventions. The target variable is discretized into three priority classes using the `create_target_class` logic:
 
 | Class | Category | Rule (Shifted Defasagem) | Description |
 | :--- | :--- | :--- | :--- |

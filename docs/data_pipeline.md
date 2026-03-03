@@ -41,6 +41,7 @@ The data flows through four distinct stages:
         - `Pedra`: Standardized classification (Quartzo, Ágata, Ametista, Topázio).
     - **Feature Engineering**: Calculates `anos_na_instituicao` by comparing `ano_ingresso` with the current data year.
     - **Validation**: Enforces a strict data contract using **Pandera**.
+    - **Feature Selection**: Selective feature inclusion was implemented, excluding attributes with high missingness or low relevance to the predictive objective. The process focused on high-fidelity academic indices (INDE, IPP) and essential student demographic data to ensure model robustness.
     - **Drift Detection**: Uses **Evidently AI** to compare the incoming batch against the historical baseline. Reports are generated in `data/reports`.
 
 ### 🥇 Gold Layer (`data/03_gold`)
@@ -68,3 +69,4 @@ To improve scalability and data reliability, future iterations should transition
 2. **Schema-First Exports**: Ensure the source system provides consistent column naming conventions across years to minimize the overhead of mapping heterogeneous headers in the Silver layer.
 3. **Direct Database Integration**: Instead of manual file uploads to a Landing folder, implement a direct extraction from the NGO's management system (ERP/CRM) into a **Cloud Data Lake**.
 4. **Data Validation at Source**: Implement automated validation checks before the data is landed to ensure mandatory fields (like Student RA) are present and correctly formatted.
+5. **Evidently AI Refinement**: As a future implementation, we could better tune our Report from Evidently AI to include customized tests and assertions for critical indices.
