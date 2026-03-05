@@ -255,7 +255,7 @@ To further mature the platform, the following points are planned for future deve
 
 ## 10. Authors
 
-Developed for FIAP - Tech Challenge 4 (ML Engineering Postgraduate Program).
+Developed for FIAP - Tech Challenge 5 (ML Engineering Postgraduate Program).
 
 * Izabelly de Oliveira Menezes | [Github](https://github.com/izabellyomenezes)
 * Larissa Diniz da Silva | [Github](https://github.com/Ldiniz737)
